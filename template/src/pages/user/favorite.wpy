@@ -1,0 +1,119 @@
+<style lang="scss">
+  .favorite{background: #fff;}
+  .footspace{height:80rpx; width: 100%; clear: both;}
+</style>
+<template>
+  <view class="container favorite">
+	    <scroll-view scroll-y="true" class="scoll-h">
+	      <view class="mlist">
+	        <view class="listbox" wx:for="{{favoriteList}}" wx:key="index">
+	        	<label class="checkbox" >
+		            <checkbox value="{{item.id}}" color="#f60" checked="{{item.checked}}" @tap="checkFavorite({{item.id}})"/>
+		        </label>
+	          <view class="avatar" >
+	          	<image class="tag" src="cloud://tuhe32-e323ac.7475-tuhe32-e323ac/images/pdd.png" mode='widthFix'></image>
+	            <image class="img" src="{{item.product.goodsThumbnailUrl}}" mode='widthFix'></image>
+	          </view>
+	          <view class="box" bindtap="showDetail({{item.product.id}})">
+	            <view class="tit"><wxc-elip line="2">{{item.product.goodsName}}</wxc-elip></view>
+	            <view class="info">
+	              <view class="sales fr">销量 {{item.product.soldQuantity}}件</view>
+	              <view class="commission fl">赚￥<text>{{item.product.promotionPrice?item.product.promotionPrice:0}}</text></view>
+	            </view>
+	            <view class="bt">
+	              <view class="coupon fr">
+	              	<view class="txt"><text>{{item.product.couponDiscount/100}}</text>元券</view>
+	              	<image class="img" src="../../assets/images/quan.png" mode='widthFix'></image>
+	              </view>
+	              <view class="price fl">券后￥<text class="cprice">{{item.product.voucherPrice}}</text><text class="oprice">￥{{item.product.minGroupPrice/100}}</text></view>
+	            </view>
+	          </view>
+	        </view>
+	      </view>
+		  <view class="footspace"></view>
+	    </scroll-view>
+    	<view class="footbar">
+	      <button class="fbtn100 btn_orange" hover-class="btn_orange_hover" bindtap="batchDelete" plain>
+	        <text>删除</text>
+	      </button>
+	    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import api from '../../api/api'
+  import baseMixin from '../../mixins/baseMixin'
+  import WxUtils from '../../utils/WxUtils'
+
+  export default class Favorite extends wepy.page {
+    config = {
+      navigationBarTitleText: '收藏夹',
+      usingComponents: {
+        'wxc-elip': '../../packages/@minui/wxc-elip/dist/index',
+      }
+    }
+    components = {
+    }
+
+    mixins = []
+
+    data = {
+        checkTabOrder: '0-1',
+        priceTag:false,
+        favoriteList:[],
+        params:{
+	      page:{ page: 1,pageSize:10},
+	      sort: {order: null, sort: null}
+	    },
+	    checkFavorites:[]
+    }
+
+    methods = {
+      checkFavorite(favoriteId) {
+      	let filters = this.checkFavorites.filter(m => m === favoriteId)
+      	if(filters && filters.length > 0) {
+      		this.favoriteList.map(m => {
+      			if(m.id === favoriteId ){
+      				m.checked = false
+      			}
+      		})
+      		this.checkFavorites = this.checkFavorites.filter(m => m != favoriteId)
+      	}else {
+      		this.favoriteList.map(m => {
+      			if(m.id === favoriteId ){
+      				m.checked = true
+      			}
+      		})
+      		this.checkFavorites.push(favoriteId)
+      	}
+      	this.$apply()
+      },
+      async batchDelete() {
+      	if(this.checkFavorites && this.checkFavorites.length > 0){
+      		let resp = await api.apiBatchUnFavorite({ids:this.checkFavorites});
+          if(resp&&resp.errMsg)return;
+      		if(resp) this.initFavoriteList()
+      	}
+      },
+      showDetail(id) {
+        if(id) WxUtils.backOrNavigate('/pages/detail?id='+id);
+      },
+
+
+    }
+
+    async initFavoriteList() {
+    	let resp = await api.apiMyFavoriteList(this.params);
+      if(resp&&resp.errMsg)return;
+    	if(resp) {
+    		this.favoriteList = resp.dataList;
+    		this.$apply()
+    	}
+    }
+
+    onLoad() {
+    	this.initFavoriteList();
+    }
+  }
+</script>

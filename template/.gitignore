@@ -1,0 +1,12 @@
+node_modules
+dist
+npm-debug.log
+yarn-error.log
+.idea
+.project
+.DS_Store
+.wepycache
+.DS_Store
+
+package-lock.json
+yarn.lock

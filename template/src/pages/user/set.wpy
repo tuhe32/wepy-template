@@ -1,0 +1,98 @@
+<style lang="scss">
+  .user_set{}
+  .set_list{margin-bottom:20rpx;}
+  .set_list .van-cell__title{ font-size: 32rpx; color: #666;}
+  .set_list .van-cell .iconfont{font-size:40rpx; margin-right: 10rpx; color: #f90;}
+  .set_btn{padding: 60rpx 30rpx;}
+  .set_btn button{border-radius: 100rpx;}
+</style>
+<template>
+  <view class="container user_set">
+     <van-cell-group custom-class="set_list">
+			  <van-cell title="我的推荐人" value="{{inviteUser.nickName}}">
+			     <view slot="icon" class="iconfont icon-yaoqing"></view>
+			  </van-cell>
+			  <van-cell title="推荐人邀请码" value="{{inviteUser.inviteCode}}">
+			     <view slot="icon" class="iconfont icon-yaoqingma"></view>
+			  </van-cell>
+        <van-cell title="设置"  value="去授权" is-link @tap="openSetting">
+           <!-- <view slot="icon" class="iconfont icon-shouji"></view> -->
+           <view slot="icon" class="iconfont icon-weixin"></view>
+        </van-cell>
+			  <!-- <van-cell title="手机"  value="18006333020">
+			     <view slot="icon" class="iconfont icon-shouji"></view>
+			  </van-cell>
+			  <van-cell title="绑定微信" value="去绑定"  is-link>
+			     <view slot="icon" class="iconfont icon-weixin"></view>
+			  </van-cell>
+			  <van-cell title="注册时间"  value="2018-09-10">
+			     <view slot="icon" class="iconfont icon-shijian"></view>
+			  </van-cell> -->
+			  
+			</van-cell-group>
+			<view class="set_btn"><button class="btn_black" @tap="logOut">退出登录</button></view>
+  </view> 
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import api from '../../api/api'
+  import baseMixin from '../../mixins/baseMixin'
+  import auth from '../../api/auth'
+
+  export default class UserIndex extends wepy.page {
+    config = {
+      navigationBarTitleText: '个人设置',
+      usingComponents: {
+      	"van-cell": "../../components/vant-weapp/cell/index",
+      	"van-cell-group": "../../components/vant-weapp/cell-group/index",
+      },
+    }
+    components = {
+    }
+
+    mixins = [baseMixin]
+
+    data = {
+		   inviteUser:{
+          inviteCode:'',
+          nickName:'',
+       },
+       
+        
+    }
+    methods = {
+      async logOut() {
+        await auth.doLogout();
+        const url = `/pages/login`;
+        this.$navigate(url);
+      },
+      openSetting() {
+        console.log('[openSetting]')
+        wx.openSetting({
+          success (res) {
+            console.log(res.authSetting)
+            // res.authSetting = {
+            //   "scope.userInfo": true,
+            //   "scope.userLocation": true
+            // }
+          }
+        })
+      }
+    }
+
+    events = {
+      
+    }
+
+    async onLoad() {
+      let resp = await api.apiGetReferee();
+      if(resp&&resp.errMsg)return;
+      if(resp && resp.weixinUser) {
+        console.log('[resp]',resp)
+        this.inviteUser = resp.weixinUser
+        this.$apply()
+      }
+    }
+  }
+</script>

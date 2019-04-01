@@ -1,0 +1,231 @@
+<style lang="scss">
+  .user_index{}
+  .user_head{padding:10rpx 30rpx 30rpx 30rpx; height: auto; overflow: hidden; background: #ff5f5f; text-align: left;}
+  .user_head image.headimg{width:160rpx; height: 160rpx; display: block; float: left; margin:20rpx 30rpx 0 0; border-radius: 100%; border:4rpx #fff solid; }
+  .user_head .name{font-size: 34rpx; color: #fff; margin:30rpx 0 20rpx 0; font-weight: bold;}
+  .user_head .nologin{font-size: 34rpx; color: #fff; margin:75rpx 0 20rpx 0; font-weight: bold;}
+  .user_head .wx{font-size: 26rpx; color: #eee; margin: 10rpx 0;}
+  .user_head .wx text{font-size: 30rpx; color: #fff;}
+  .user_head .wx text.iconfont{font-size:30rpx; color: #fff; margin-right: 10rpx;}
+  .user_head .fr{margin-top:80rpx; font-size: 40rpx; color: #ddd;}
+  .user_partner{margin:0; width: 100%; height: 188rpx; overflow: hidden; text-align: left; background: #fc0; position: relative;}
+  .user_partner .box{position:absolute; width:100%; padding:40rpx 30rpx 0rpx 30rpx;}
+  .user_partner .tit{font-size: 34rpx; color: #333;}
+  .user_partner .tit text{margin-right:10rpx; font-size:36rpx; color: #ff5f5f;}
+  .user_partner .fr{margin-top:36rpx; font-size: 36rpx; color: #999;}
+  .user_partner .tips{font-size: 28rpx; color: #999; margin:40rpx 0 0 48rpx;}
+  .user_partner .bgimg{width: 100%; display: block;}
+  .user_account{padding:30rpx; background: #fff; display: flex; flex-wrap:nowrap; justify-content: space-between;}
+  .user_account .a0{width: 33.3%; font-size: 28rpx; color: #999; text-align: center; border-right:2rpx #eeeeee solid; padding: 20rpx 0;}
+  .user_account .a0 view{font-size: 40rpx; color: #464646; margin-bottom: 15rpx; font-weight: bold;}
+  .user_account .a0 view.red{color: #f30;}
+  .user_account .a1{width: 33.3%; border: 0; padding: 20rpx 0;}
+  .user_account .a1 .btn{margin-top: 20rpx;}
+  .user_member{padding:30rpx; background: #fff; display: flex; flex-wrap:nowrap; justify-content: space-between;}
+  .user_member .m0{width: 33.3%; font-size: 28rpx; color: #999; text-align: center; border-right:2rpx #eeeeee solid; padding: 20rpx 0;}
+  .user_member .m0 view{font-size: 40rpx; color: #464646; margin-bottom: 15rpx; font-weight: bold;}
+  .user_member .m0:last-child{border: 0;}
+  .user_member .m0 view.red{color: #f30;}
+  .user_menu{margin:20rpx 0;}
+  .user_menu .van-cell__title{ font-size: 32rpx; color: #666;}
+  .user_menu .van-cell .iconfont{font-size:40rpx; margin-right: 10rpx; color: #ff5f5f;}
+  .user_index .code{background: #fff; padding: 20rpx 30rpx; text-align: center; margin:20rpx 0; display: flex; flex-wrap:nowrap; justify-content: center;}
+  .user_index .code .editbox{width: 60%; border:2rpx #dddddd solid; border-radius:50rpx; height:60rpx; line-height:60rpx; font-size: 30rpx; margin: 20rpx 0; padding-left: 20rpx; }
+	.user_index .code .btn{margin: 20rpx 0 20rpx 20rpx; border-radius: 60rpx;}
+	.user_index .code1{background: #fff; padding:40rpx 40rpx; text-align: left; margin:20rpx 0; margin-top: 20rpx; font-size: 30rpx; text-align: left;}
+	.user_index .code1 .l{float: left; color: #999;}
+	.user_index .code1 .c{color: #f60; margin-left:40rpx; font-size: 36rpx;}
+	.user_index .code1 .r{float: right;color: #06c;}
+</style>
+<template>
+  <view class="container user_index">
+  	<scroll-view scroll-y="true" class="scoll-h">
+			 <view class="user_head" bindtap="showUserSet">
+			 		<view class="iconfont icon-fanhui2 fr"></view>
+			 	  <image src="{{currentUser.headImgUrl}}" wx:if="{{currentUser != null && currentUser.headImgUrl}}" class="headimg" mode='widthFix' ></image>
+          <image src="cloud://tuhe32-e323ac.7475-tuhe32-e323ac/images/head_man.jpg" wx:else class="headimg" mode='widthFix' ></image>
+			 	  <view class="nologin" wx:if="{{currentUser == null}}">未登录</view>
+			 	  <view class="name" wx:else>{{currentUser.nickName}}</view>
+			 	  <!-- <view class="wx"><text class="iconfont icon-weixin"></text><text></text>未绑定微信</view>
+			 	  <view class="wx"><text class="iconfont icon-shouji"></text><text>13561995858</text></view> -->
+			 </view>
+	     <view class="code" wx:if="{{isSaveCode}}">
+	     	 <input class="editbox" placeholder="请输入邀请码" value="{{inviteCode}}" bindinput="handleInviteCode" placeholder-style="color:#ccc" />
+	     	 <button class="btn btn_borange" size="mini" plain bindtap="saveInviteCode">确认提交</button>
+	     </view>
+       <view class="code1" wx:if="{{isShowCode}}">
+          <text class="l">您的邀请码是:</text>
+          <text class="c">{{currentUser.inviteCode}}</text>
+          <text class="r" @tap="handleCopy">复制</text>
+       </view>
+	     <view class="user_account">
+	 			 <view class="a0"><view class="red">{{reports.personal.withdrawablecash}}</view>可提现金额</view>
+	 			 <view class="a0"><view>{{reports.personal.expectedaccountamount}}</view>预计到账金额</view>
+	 			 <view class="a1"><button class="btn btn_borange fr" size="mini" plain bindtap="showWithdraw">立即提现</button></view>
+	     </view>
+	     <view class="user_partner" bindtap="showPartner">
+			 	  <view class="box">
+				 		<view class="iconfont icon-fanhui2 fr"></view>
+				 		<view class="tit"><text class="iconfont icon-quanyi"></text>合伙人</view>
+				 		<view class="tips">享受高级权益，赚取更多佣金</view>
+			 		</view>
+			 		<image src="../../assets/images/partnerbg.jpg" class="bgimg" mode='widthFix' ></image>
+			 </view>
+			 <view class="user_member">
+	 			 <view class="m0"><view class="red">{{reports.partner.directlyaffiliatedmemberscount}}</view>直属会员</view>
+	 			 <view class="m0"><view>{{reports.partner.directlyaffiliatedmemberschildcount}}</view>直属会员下级数</view>
+	 			 <view class="m0"><view>{{reports.partner.sumincome}}</view>团队累计收益</view>
+	     </view>
+	     <van-cell-group custom-class="user_menu">
+				  <van-cell title="我的团队"  is-link bindtap="showTeam">
+				     <view slot="icon" class="iconfont icon-tuandui"></view>
+				  </van-cell>
+				  <van-cell title="推广订单" bindtap="showOrder" is-link>
+				     <view slot="icon" class="iconfont icon-dingdan"></view>
+				  </van-cell>
+				  <!-- <van-cell title="邀请合伙人"  is-link  bindtap="showInvitation">
+				     <view slot="icon" class="iconfont icon-yaoqing1"></view>
+				  </van-cell> -->
+				  <van-cell title="收藏夹"  is-link  bindtap="showFavorite">
+				     <view slot="icon" class="iconfont icon-xihuan"></view>
+				  </van-cell>
+
+				</van-cell-group>
+				<van-cell-group custom-class="user_menu">
+
+				  <van-cell title="客服与帮助"  is-link  bindtap="showInvitation">
+				     <view slot="icon" class="iconfont icon-kefu"></view>
+				  </van-cell>
+				  <!-- <van-cell title="使用教程"  is-link  bindtap="showCourse">
+				     <view slot="icon" class="iconfont icon-jiaocheng"></view>
+				  </van-cell> -->
+				  <van-cell title="新手指引" is-link bindtap="showHelp">
+				     <view slot="icon" class="iconfont icon-xinshou"></view>
+				  </van-cell>
+					<van-cell title="联系我们" is-link bindtap="showContact">
+				     <view slot="icon" class="iconfont icon-lianxiwomen"></view>
+				  </van-cell>
+				</van-cell-group>
+			</scroll-view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import api from '../../api/api'
+  import baseMixin from '../../mixins/baseMixin'
+  import Tips from '../../utils/Tips'
+  import WxUtils from '../../utils/WxUtils'
+
+  export default class UserIndex extends wepy.page {
+    config = {
+      navigationBarTitleText: '个人中心',
+      usingComponents: {
+      	"van-cell": "../../components/vant-weapp/cell/index",
+      	"van-cell-group": "../../components/vant-weapp/cell-group/index",
+      },
+    }
+    components = {
+    }
+
+    mixins = [baseMixin]
+
+    data = {
+       userId:null,
+       isSaveCode:false,
+       isShowCode:false,
+       inviteCode:'',
+       reports:{
+          personal:{
+            withdrawablecash:0,
+            expectedaccountamount:0
+          },
+          partner:{
+            directlyaffiliatedmemberscount:0,
+            directlyaffiliatedmemberschildcount:0,
+            sumincome:0,
+          }
+       }
+    }
+    methods = {
+      showUserSet() {
+        wx.navigateTo({url: '/pages/user/set'})
+      },
+      showPartner() {
+        wx.navigateTo({url: '/pages/user/partner'})
+      },
+      showWithdraw() {
+        wx.navigateTo({url: '/pages/user/withdraw'})
+      },
+      showInvitation() {
+        wx.navigateTo({url: '/pages/user/invitation'})
+      },
+      showTeam() {
+        wx.navigateTo({url: '/pages/user/team'})
+      },
+      showOrder() {
+        wx.navigateTo({url: '/pages/user/order'})
+      },
+      showFavorite() {
+        WxUtils.backOrNavigate('/pages/user/favorite');
+      },
+      showCourse() {
+        wx.navigateTo({url: '/pages/course'})
+      },
+      showHelp() {
+        wx.navigateTo({url: '/pages/help'})
+      },
+      showContact() {
+        wx.navigateTo({url: '/pages/user/contact'})
+      },
+      handleCopy() {
+        wx.setClipboardData({data:this.currentUser.inviteCode,success:()=>Tips.success('复制成功'),fail:()=>Tips.error('复制失败')})
+      },
+      handleInviteCode(e) {
+        this.inviteCode = e.detail.value
+        this.$apply()
+      },
+      async saveInviteCode() {
+        console.log('[inviteCode]',this.inviteCode)
+        let resp = await api.apiSaveInviteCode({id:this.userId,parentInviteCode:this.inviteCode})
+        if(resp&&resp.errMsg){
+          Tips.error('该邀请码不存在')
+          return;
+        }
+        if(resp && resp.weixinUser) {
+          console.log('inviteCode resp',resp)
+          this.currentUser = resp.weixinUser;
+          await this.storageKey('user', resp.weixinUser);
+          this.isSaveCode = false;
+          this.isShowCode = true;
+          this.$apply()
+        }
+      }
+    }
+
+    events = {
+
+    }
+
+    async onLoad() {
+      if(this.currentUser)this.userId = this.currentUser.id
+      api.apiPersonalReports().then(resp =>{
+        if(resp&&resp.errMsg) return;
+        if(resp) {
+          // console.log('[resp.personalReports]',resp.personalReports)
+          this.reports = resp.personalReports
+          this.$apply()
+        }
+      })
+      let resp =  await api.apiGetUserInfo({id:this.userId});
+      if(resp&&resp.errMsg) return;
+      if(resp) {
+        this.currentUser = resp.weixinUser
+        if(this.currentUser && !this.optional(this.currentUser.parentInviteCode)) this.isSaveCode = true
+        else if(this.currentUser && this.optional(this.currentUser.inviteCode)) this.isShowCode = true;
+      }
+
+      this.$apply()
+    }
+  }
+</script>

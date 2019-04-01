@@ -1,0 +1,283 @@
+<style lang="scss">
+  .detail{}
+	.topswiper{width: 100%; height:750rpx; overflow: hidden;}
+	.topswiper .slide-image{width: 100%; display: block;}
+	.detail_tit{background: #fff; height: auto; overflow: hidden; padding:30rpx 30rpx; border-radius:20rpx; position: relative; margin-top: -10rpx; text-align: left; box-shadow:0 5rpx 5rpx #eee;}
+	.detail_tit .tit{font-size: 32rpx; color: #454545;}
+	.detail_tit .info{height: auto; overflow: hidden; padding:30rpx 0;}
+  .detail_tit .coupon{width:120rpx; height:60rpx; font-size: 24rpx; color: #fff; display: block; position: relative;}
+  .detail_tit .coupon image{width: 100%; display: block;}
+  .detail_tit .coupon .txt{position: absolute; width: 100%; height: 60rpx; line-height: 50rpx; text-align: center;}
+  .detail_tit .coupon .txt text{color: #ff0; font-size:32rpx; font-weight: bold;}
+  .detail_tit .sales{font-size: 28rpx; color: #999;}
+  .detail_tit .oprice{font-size: 28rpx; color: #999; margin:16rpx 0 0 20rpx; text-decoration: line-through;}
+  .detail_tit .price{font-size: 24rpx; color: #999;}
+  .detail_tit .price text{font-size:40rpx; color: #f00;}
+  .detail_tit .commission{font-size:30rpx;  color: #fff; border-radius:60rpx; background: #f00; height:50rpx; line-height:50rpx; padding:0 20rpx;}
+  .detail_tit .commission text{color: #ff0; font-size: 36rpx;}
+  .detail_tit .post{padding:4rpx 10rpx; font-size: 24rpx; color: #fff; background: #ff615e; border-radius:6rpx; margin:5rpx 0 0 10rpx;}
+  .detail_tips{padding:30rpx; height: auto; overflow: hidden; text-align: left; margin-bottom:100rpx;}
+  .detail_tips .tit{font-size: 30rpx; color: #f60; margin-bottom: 10rpx;}
+  .detail_tips .con{font-size:28rpx; color: #666; line-height: 1.5;}
+  .popup_share{}
+  .popup_share .share_t{width: 100%; height: 80rpx; line-height: 80rpx; background: #fc0;color: #fff;  text-align: center;}
+  .popup_share .share_t text.iconfont{float: right; font-size: 30rpx; margin:0 15rpx 0 0;}
+  .popup_share .share_t .tit{font-size: 36rpx;}
+  .popup_share .share_c{margin: 20rpx 30rpx; padding: 20rpx 30rpx; line-height: 1.8; text-align: left; font-size: 30rpx; color:#333; background: #f3f3f3; border-radius: 10rpx;}
+  .popup_share .share_c text{display: block;}
+  .popup_share .share_b{margin: 20rpx 30rpx; display: flex; justify-content: space-between;}
+  .popup_share .share_b button{background: none; line-height: 1.8;}
+  .popup_share .share_b button view{width:100rpx; height: 100rpx; line-height: 100rpx; display: block; overflow: hidden; font-size:50rpx; color: #fff; background: #f60; border-radius: 100%; margin: 0 auto;}
+  .popup_share .share_b button text{color: #666; font-size: 30rpx;}
+  .popup_share .share_b button.btn_yellow view{background: #fc0;}
+  .popup_share .share_b button.btn_orange view{background: #f60;}
+  .popup_share .share_b button.btn_pink view{background: #ff5f5f;}
+</style>
+<template>
+  <view class="container detail">
+    <swiper indicator-dots="true" class="topswiper" autoplay="true" interval="5000" >
+      <block wx:for="{{productDetail.goodsGalleryUrls?productDetail.goodsGalleryUrls:[]}}" wx:key="index">
+        <swiper-item>
+          <image src="{{item}}" class="slide-image" mode="widthFix" />
+        </swiper-item>
+      </block>
+    </swiper>
+    <view class="detail_tit">
+      <view class="tit">{{productDetail.goodsName}}</view>
+      <view class="info">
+        <view class="coupon fl">
+        	<view class="txt"><text>{{productDetail.couponDiscount/100}}</text> 元券</view>
+            <image class="img" src="../assets/images/quan.png" mode='widthFix'></image>
+        </view>
+        <view class="sales fr">销量 {{productDetail.soldQuantity}}件</view>
+      </view>
+      <view class="bt">
+        <view class="commission fr">赚 {{productDetail.promotionPrice?productDetail.promotionPrice:0}}元</view>
+        <view class="price fl">券后价 ￥<text>{{productDetail.voucherPrice}}</text></view>
+        <view class="oprice fl">￥{{productDetail.minGroupPrice/100}}</view>
+      </view>
+    </view>
+    <!--<view class="detail_tips">
+       <view class="tit">推荐理由</view>
+       <view class="con">我脑袋不是很好使，就想到这句话：你自己先去充当客户这个角色，不停的去尝试，然后，把你每次得出的心得写出来，慢慢的你就会积累50个让客户购买你产品的理由了，我脑袋不是很好使，就想到这句话：你自己先去充当客户这个角色，不停的去尝试，然后，把你每次得出的心得写出来，慢慢的你就会积累50个让客户购买你产品的理由了，</view>
+    </view>-->
+    <view class="footbar">
+      <button bindtap="showHome" class="fbtn0" hover-class="btn0_hover" plain>
+        <text class="iconfont icon-shouye" ></text>
+        <text>首页</text>
+      </button>
+      <button bindtap="favorite" class="fbtn0" hover-class="btn0_hover" plain>
+        <text class="iconfont icon-xihuan1 orange" wx:if="{{isFavorite}}"></text>
+        <text class="iconfont icon-xihuan" wx:else></text>
+        <text class="orange" wx:if="{{isFavorite}}">已收藏</text>
+        <text wx:else>收藏</text>
+      </button>
+      <button class="fbtn1 btn_orange" hover-class="btn_orange_hover" bindtap="sharePopup" plain>
+        <text>推广</text>
+      </button>
+      <button class="fbtn1 btn_red" hover-class="btn_orange_hover" bindtap="promotionBuy" plain>
+        <text>领券购买</text>
+      </button>
+    </view>
+    <van-popup show="{{ popupShow }}" position="bottom" overlay="{{ true }}" bind:click-overlay="onClose">
+				<view class="popup_share">
+					  <view class="share_t">
+					  	  <text class="iconfont icon-guanbi" @tap="onClose"></text>
+					  		<view class="tit">分享</view>
+					  </view>
+					  <view class="share_c">
+					  			<text>{{shareGoodsName}}</text>
+					  			<text>{{shareOrigin}}</text>
+					  			<text>{{sharePrice}}</text>
+					  			<text>{{shareUrl}}</text>
+					  </view>
+					  <view class="share_b">
+					  	  <button class="btn_yellow" bindtap="shareCopy" plain>
+					        <view class="iconfont icon-copy"></view>
+					        <text>复制文案</text>
+				        </button>
+				        <button class="btn_orange" open-type="share" plain>
+					        <view class="iconfont icon-fenxiang"></view>
+					        <text>直接分享</text>
+				        </button>
+				        <button class="btn_pink" bindtap="sharePost" plain>
+					        <view class="iconfont icon-xiaochengxu"></view>
+					        <text>小程序二维码</text>
+				        </button>
+					  </view>
+				</view>
+    </van-popup>
+    <mySharePopup :shareTitle.sync="shareTitle" :shareImgUrl.sync="shareImgUrl" :scene.sync="scene" :page.sync="page" :productDetail.sync="productDetail" :windowWidth.sync="systemWidth" ></mySharePopup>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import baseMixin from '../mixins/baseMixin'
+  import api from '../api/api'
+  import Tips from '../utils/Tips'
+  import mySharePopup from '../components/mySharePopup'
+
+  export default class Detail extends wepy.page {
+    config = {
+      navigationBarTitleText: '商品详情',
+      usingComponents: {
+      	"van-popup": "../components/vant-weapp/popup/index",
+      }
+    }
+    components = {mySharePopup }
+
+    mixins = [baseMixin]
+
+    data = {
+      imgUrls: [
+        'cloud://tuhe32-e323ac.7475-tuhe32-e323ac/images/p1.jpg',
+        'cloud://tuhe32-e323ac.7475-tuhe32-e323ac/images/p2.jpg',
+        'cloud://tuhe32-e323ac.7475-tuhe32-e323ac/images/p3.jpg'
+      ],
+      productDetail:null,
+      loading:false,
+      goodsId:null,
+      pinDoDoAppId:"",
+      pinDoDoPath:'',
+      shareTitle:"",
+      shareImgUrl:"",
+      scene:"1",
+      page:"pages/detail",
+      customParam:null,
+      isFavorite:false,
+      popupShow:false,
+      shareGoodsName:'测试',
+      shareOrigin:'原价：￥',
+      sharePrice:'现价：￥',
+      shareUrl:'下单地址：',
+      systemWidth:720,
+      favoriteProduct:{},
+    }
+
+    computed = {
+
+    }
+
+    methods = {
+      async favorite() {
+        if(!this.isFavorite) {
+          let resp = await api.apiFavorite({productId:this.productDetail.id});
+          if(resp&&resp.errMsg)return;
+          if(resp) {
+            this.favoriteProduct.id = resp
+            this.isFavorite = !this.isFavorite;
+          }
+        }else {
+          let resp = await api.apiUnFavorite({id:this.favoriteProduct.id})
+          if(resp&&resp.errMsg)return;
+          if(resp) this.isFavorite = !this.isFavorite;
+        }
+        this.$apply()
+      },
+      promotionBuy() {
+        console.log(111)
+        wx.navigateToMiniProgram({  appId: this.pinDoDoAppId,  path: this.pinDoDoPath,  extraData: {},  envVersion: 'trial',  success(res) {    // 打开成功
+            console.log(666)
+          }})
+      },
+      sharePost() {
+        this.popupShow = false;
+        this.$apply()
+        Tips.loading()
+        this.$invoke('mySharePopup', 'makeShareCanvas')
+      },
+      shareCopy() {
+        let shareWords = this.shareGoodsName+' \n '+this.shareOrigin+' \n '+this.sharePrice+' \n '+this.shareUrl
+        wx.setClipboardData({
+          data:shareWords,
+          success:()=>Tips.success('复制成功'),
+          fail:()=>Tips.error('复制失败')
+        })
+      },
+      sharePopup(){
+      	this.popupShow = true;
+      	this.$apply()
+      },
+      onClose() {
+		    this.popupShow = false;
+		    this.$apply()
+		  },
+		  showHome() {
+        wx.switchTab({
+          url: '/pages/index'
+        })
+      },
+    }
+
+    events = {
+
+    }
+    onShareAppMessage (options) {
+      return {
+        title: '24小时买好物-'+this.productDetail.goodsName,
+        imageUrl: this.productDetail.goodsThumbnailUrl,
+        path: '/pages/detail?scene='+this.productDetail.id+'-'+this.currentUser.id
+      };
+    }
+    async initPromotionUrl() {
+      let resp = await api.apiGetPromotionUrl({id:this.goodsId,customParam:this.customParam});
+      if(resp&&resp.errMsg)return;
+      if(resp && resp.we_app_info) {
+        this.pinDoDoAppId = resp.we_app_info.app_id
+        this.pinDoDoPath = resp.we_app_info.page_path
+
+        this.shareGoodsName = this.productDetail.goodsName
+        this.shareOrigin = this.shareOrigin+this.productDetail.minGroupPrice/100
+        this.sharePrice = this.sharePrice+(this.productDetail.minGroupPrice- this.productDetail.couponDiscount)/100
+        this.shareUrl = this.shareUrl+ resp.we_app_web_view_short_url
+        // this.$navigate('/pages/promotionUrl?promotionUrl='+resp.we_app_web_view_url);
+      }
+    }
+    async initFavorite() {
+      let resp = await api.apiFindFavorite({productId:this.productDetail.id});
+      if(resp&&resp.errMsg)return;
+      console.log('[favoriteProduct]',resp)
+      if(resp){
+        if(resp.favoriteProduct) {
+          this.favoriteProduct = resp.favoriteProduct;
+          this.isFavorite = true;
+        }else this.isFavorite = false;
+        this.$apply()
+      }
+    }
+    async onLoad(options) {
+      this.loading = true;
+      let scene = options.scene
+      let productId = 0
+      if(scene) {
+        let strs = scene.split('-');
+        console.log('[strs]',strs)
+        if(strs && strs.length > 0) {
+          productId = strs[0]
+          this.customParam = strs[1]
+        }
+        await wepy.setStorage({key: "temp_url", data: '/pages/detail?scene='+scene});
+      }else productId = options.id
+      const systemInfo = await wx.getSystemInfoSync()
+      this.systemWidth = systemInfo.windowWidth
+      if(productId) {
+        let resp = await api.apiGetProductDetail({id:productId})
+        console.log('[resp detail]',resp)
+        this.goodsId = resp.product.goodsId;
+        let goodsGalleryUrls = resp.product.goodsGalleryUrls
+        if(goodsGalleryUrls){
+          resp.product.goodsGalleryUrls = goodsGalleryUrls.split(";")
+        }
+        this.productDetail = resp.product
+        this.shareTitle = this.productDetail.goodsName
+        this.shareImgUrl = this.productDetail.goodsThumbnailUrl
+        this.scene = productId +'-'+this.currentUser.id
+        this.initPromotionUrl();
+        this.initFavorite();
+        this.loading = false
+        this.$apply()
+      }
+    }
+  }
+</script>

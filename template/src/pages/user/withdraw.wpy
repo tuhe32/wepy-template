@@ -1,0 +1,76 @@
+<style lang="scss">
+  .withdraw{height: 100%; overflow: hidden;}
+	.withdraw .box{padding:30rpx; text-align: left; margin: 30rpx; background: #fff; border-radius: 20rpx;position: relative;}
+	.withdraw .box .tit{ font-size: 32rpx; color: #454545;}
+	.withdraw .box .icon{font-size:60rpx; color: #333; font-weight: bold; position: absolute; top:112rpx; left:20rpx;}
+	.withdraw .box input{height:120rpx; line-height: 80rpx; font-size:60rpx; color: #333; margin: 20rpx 0;	border-bottom:2rpx #dddddd solid;padding-left: 50rpx;}
+	.withdraw .box .tips{font-size: 28rpx; color: #999; line-height:1.8;}
+	.withdraw .share_btn{margin:50rpx 30rpx; text-align: center;}
+	.withdraw .share_btn button{border-radius:60rpx; font-size: 34rpx;}
+	.withdraw .share_btn navigator{font-size: 30rpx; margin-top:30rpx; color: #666;}
+</style>
+<template>
+  <view class="container withdraw">
+			<view class="box">
+					<view class="tit">提现金额</view>
+					<text class="icon">￥</text>
+					<input type="number" placeholder="0.00" placeholder-style="color:#333" />
+					<view class="tips">
+						<text>每月21日结算上月确认收货的订单，提现金额不低于20元，最高50000元；22日至29日为申请提现时间，超过此时间将在当月无法提现，需要等到下月22日，提现提交后，3个工作日内处理。</text>
+					</view>
+			</view>
+
+			<view class="share_btn">
+				<button class="btn_black">确认提现</button>
+				<navigator url="/pages/user/record" hover-class="navigator-hover">结算明细</navigator>
+			</view>
+
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import testMixin from '../../mixins/test'
+
+  export default class Withdraw extends wepy.page {
+    config = {
+      navigationBarTitleText: '提现',
+      usingComponents: {
+      	'van-search': '../../components/vant-weapp/search/index',
+      	"van-cell": "../../components/vant-weapp/cell/index",
+      	"van-cell-group": "../../components/vant-weapp/cell-group/index",
+      },
+    }
+    components = {
+    }
+
+    mixins = [testMixin]
+
+    data = {
+    	poster:[
+    		{ item: 0, img: "../../assets/images/hb1.jpg" },
+    		{ item: 1, img: "cloud://tuhe32-e323ac.7475-tuhe32-e323ac/images/hb2.jpg" },
+    		{ item: 2, img: "../../assets/images/hb1.jpg" },
+    	]
+    }
+    methods = {
+      onTabChange(event) {
+        let selectedId = event.detail.index+1
+        console.log('[选择tab]',selectedId)
+        // let {componentId} = event.source;
+        this.currentTab = selectedId;
+//      this.init();
+        this.$apply();
+//      this.getBuyList();
+      },
+    }
+
+    events = {
+
+    }
+
+    onLoad() {
+
+    }
+  }
+</script>

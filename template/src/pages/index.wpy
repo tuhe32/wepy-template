@@ -1,0 +1,502 @@
+<style lang="scss">
+  .home{}
+  .home .topbar{
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 90rpx;
+    color: #fff;
+    background: #fff;
+    overflow: hidden;
+    position: fixed;
+    z-index: 1000;
+  }
+  .home .vanTab {
+    width:100%;
+    margin:0;
+    padding: 0;
+    position: fixed;
+    top: 90rpx;
+    z-index: 1000;
+
+  }
+  .home .vanTab .van-tabs{}
+  .home .vanTab .van-tabs .van-tabs__nav{background:#fff;}
+  .home .vanTab .van-tab{
+    height:90rpx;
+    font-size: 32rpx;
+    line-height:75rpx;
+    color: #666;
+    margin: 0;
+    padding: 0;
+    background:#fff;
+    -webkit-flex:0 0 16.5%;
+    flex:0 0 16.5%;
+    border-bottom:1rpx #eeeeee solid;
+  }
+  .home .vanTab .van-tab--active{color: #f30;}
+  .topbar .search {
+    flex: 1;
+    margin: 0 16rpx 0 24rpx;
+  }
+  .topbar .iconfont{font-size: 40rpx;}
+  .topbar .top_notice{margin:16rpx 30rpx 0 0; color: #666;}
+  .user__un-read-msg-count {
+    position: absolute;
+    top: 0rpx;
+    right:15rpx;
+  }
+  .tab-content{padding-top: 180rpx;}
+  .banner{padding: 30rpx 30rpx 20rpx 30rpx; height:270rpx; overflow: hidden; background: #fff;}
+  .banner image{width: 100%; display: block; border-radius: 10rpx;}
+  .banner1{padding: 30rpx 30rpx 0rpx 30rpx; height:210rpx; overflow: hidden; background: #fff;}
+  .banner1 image{width: 100%; display: block; border-radius: 10rpx;}
+  .menu{padding:10rpx 30rpx 10rpx 30rpx; height: auto; overflow: hidden; background: #fff; margin-top: -30rpx; }
+  .menu image{display: block;}
+  .menu .m1{width:245rpx; float: left;}
+  .menu .m2{width:430rpx; float: right; margin-bottom:15rpx;}
+  .menu .m3{width:210rpx; float: right;}
+  .menu .m4{width:210rpx; float: right; margin-left: 13rpx;}
+
+  .topspace{height:70rpx; overflow: hidden; display: block; width: 100%;}
+  .bottomspace{height:80rpx; overflow: hidden; display: block; width: 100%;}
+</style>
+<template>
+  <view class="container home">
+    <view class="topbar">
+      <wxc-search class="search" radius="30" mode="static" align="center" @tap="goSearch" placeholder="搜索优惠商品" bg-color="#f6f6f6"></wxc-search>
+      <view class="top_notice iconfont icon-lingdang fr" bindtap="showNotice"></view>
+      <wxc-badge class="user__un-read-msg-count">0</wxc-badge>
+    </view>
+    <van-tabs class="vanTab" active="{{ currentTab }}" bind:change="onTabChange">
+      <van-tab wx:for="{{types}}" wx:key="index" title="{{item.optName}}"></van-tab>
+    </van-tabs>
+    <swiper class="tab-content" current="{{currentTab}}" duration="300" bindchange="switchTab" style="height:{{winHeight}}rpx; width: 100%">
+      <swiper-item wx:for="{{types}}" wx:key="index">
+        <scroll-view scroll-y="true" class="scoll-h" scroll-top="{{scrollTop}}" bindscrolltolower="scrolltolower" lower-threshold="100">
+          <swiper class="{{index == 0?'banner':'banner1'}}" indicator-dots="{{index == 0?true:false}}" indicator-color="#cccccc" indicator-active-color="#f60" autoplay="true" interval="3000" duration="300">
+            <block wx:for="{{imgUrls}}" wx:key="index">
+              <swiper-item>
+                <image src="{{item}}" class="slide-image"  mode='widthFix'/>
+              </swiper-item>
+            </block>
+          </swiper>
+          <view class="menu" wx:if="{{index == 0}}">
+            <image src="cloud://tuhe32-e323ac.7475-tuhe32-e323ac/images/menu1.png" mode='widthFix' class="m1"  bindtap="showNine" ></image>
+            <image src="cloud://tuhe32-e323ac.7475-tuhe32-e323ac/images/menu2.png" mode='widthFix' class="m2"  bindtap="showTimeLimit" ></image>
+            <image src="cloud://tuhe32-e323ac.7475-tuhe32-e323ac/images/menu4.png" mode='widthFix' class="m4"  bindtap="showBurst" ></image>
+            <image src="cloud://tuhe32-e323ac.7475-tuhe32-e323ac/images/menu3.png" mode='widthFix' class="m3"  bindtap="showBrand" ></image>
+          </view>
+          <view class="sort">
+            <button class="s1 {{item.checkTabOrder == 1?'active':''}}" size="mini" plain @tap="reOrderList(1)">综合</button>
+            <button class="s2 {{item.checkTabOrder == 2?'active':''}}" size="mini" plain @tap="reOrderList(2)">佣金</button>
+            <button class="s3 {{item.checkTabOrder == 3?'active':''}}" size="mini" plain @tap="reOrderList(3)">销量</button>
+            <button class="s4 {{item.checkTabOrder == 4?'active':''}}" size="mini" plain @tap="reOrderList(4)"><text class="txt" >价格</text>
+              <block wx:if="{{item.checkTabOrder == 4}}">
+                <text wx:if="{{!item.priceTag}}" class="iconfont icon-xiangxia1"></text><text wx:else class="iconfont icon-xiangshang1"></text>
+              </block>
+            </button>
+          </view>
+          <view class="mlist1">
+            <view class="listbox1" wx:for="{{types[index].productList}}" wx:key="index" bindtap="showDetail({{item.id}})">
+              <view class="avatar">
+                <image class="tag" src="cloud://tuhe32-e323ac.7475-tuhe32-e323ac/images/pdd.png" mode='widthFix'></image>
+                <image class="img" src="{{item.goodsThumbnailUrl}}" mode='widthFix'></image>
+              </view>
+              <view class="box">
+                <view class="tit"><wxc-elip line="2">{{item.goodsName}}</wxc-elip></view>
+                <view class="info">
+                  <view class="sales fr">销量 {{item.soldQuantity}}件</view>
+                  <view class="commission fl">赚<text class="small">￥</text><text>{{item.promotionPrice?item.promotionPrice:0}}</text></view>
+                </view>
+                <view class="bt">
+                  <view class="coupon fr">
+                    <view class="txt"><text>{{item.couponDiscount/100 }}</text> 元券</view>
+                    <image class="img" src="../assets/images/quan.png" mode='widthFix'></image>
+                  </view>
+                  <view class="price fl"><view class="txt"> 券后</view><view class="cprice">￥<text>{{item.voucherPrice }}</text></view></view>
+                </view>
+                <view class="bt1">
+                  <!--<view class="post"></view>--><text class="oprice">原价:￥{{item.minGroupPrice/100}}</text>
+                </view>
+              </view>
+            </view>
+            <!--    <view class="listbox1" bindtap="showDetail">
+                 <view class="avatar">
+                     <image class="tag" src="cloud://tuhe32-e323ac.7475-tuhe32-e323ac/images/tb.png" mode='widthFix'></image>
+                   <image class="img" src="cloud://tuhe32-e323ac.7475-tuhe32-e323ac/images/p2.jpg" mode='widthFix'></image>
+                 </view>
+                 <view class="box">
+                   <view class="tit"><wxc-elip line="2">时尚运动套【领券1套仅57两套99】（每个ID限购5件）</wxc-elip></view>
+                   <view class="info">
+                     <view class="sales fr">销量 53件</view>
+                     <view class="commission fl">赚<text class="small">￥</text><text>4.33</text></view>
+                   </view>
+                   <view class="bt">
+                     <view class="coupon fr">
+                         <view class="txt"><text>20</text> 元券</view>
+                         <image class="img" src="../assets/images/quan.png" mode='widthFix'></image>
+                     </view>
+                     <view class="price fl"><view class="txt">券后</view><view class="cprice">￥<text>25.80</text></view></view>
+                   </view>
+                   <view class="bt1">
+                        <view class="post">包邮</view><text class="oprice">￥30.00</text>
+                   </view>
+                 </view>
+               </view>
+               <view class="listbox1" bindtap="showDetail">
+                 <view class="avatar">
+                     <image class="tag" src="cloud://tuhe32-e323ac.7475-tuhe32-e323ac/images/pdd.png" mode='widthFix'></image>
+                   <image class="img" src="cloud://tuhe32-e323ac.7475-tuhe32-e323ac/images/p1.jpg" mode='widthFix'></image>
+                 </view>
+                 <view class="box">
+                   <view class="tit"><wxc-elip line="2">时尚运动套【领券1套仅57两套99】（每个ID限购5件）</wxc-elip></view>
+                   <view class="info">
+                     <view class="sales fr">销量 53件</view>
+                     <view class="commission fl">赚<text class="small">￥</text><text>4.33</text></view>
+                   </view>
+                   <view class="bt">
+                     <view class="coupon fr">
+                         <view class="txt"><text>20</text> 元券</view>
+                         <image class="img" src="../assets/images/quan.png" mode='widthFix'></image>
+                     </view>
+                     <view class="price fl"><view class="txt">券后</view><view class="cprice">￥<text>25.80</text></view></view>
+                   </view>
+                   <view class="bt1">
+                        <view class="post">包邮</view><text class="oprice">￥30.00</text>
+                   </view>
+                 </view>
+               </view> -->
+            <view class="bottomspace"></view>
+          </view>
+
+        </scroll-view>
+      </swiper-item>
+      <!-- 	<swiper-item wx:for="{{[1,2,3,4,5,6,7,8,9,10,11,12]}}" wx:key="index">
+            <scroll-view scroll-y="true" class="scoll-h">
+                <swiper class="banner1" indicator-dots="{{false}}" indicator-color="#cccccc" indicator-active-color="#f60" autoplay="{{true}}" interval="3000" duration="300">
+                         <block wx:for="{{imgUrls}}">
+                                    <swiper-item>
+                                      <image src="{{item}}" class="slide-image"  mode='widthFix'/>
+                                    </swiper-item>
+                                  </block>
+                                </swiper>
+                <view class="sort">
+                      <button class="s1 {{checkTabOrder == item+'-1'?'active':''}}" size="mini" plain @tap="reOrderList({{item}},1)">综合</button>
+                      <button class="s2 {{checkTabOrder == item+'-2'?'active':''}}" size="mini" plain @tap="reOrderList({{item}},2)">佣金</button>
+                      <button class="s3 {{checkTabOrder == item+'-3'?'active':''}}" size="mini" plain @tap="reOrderList({{item}},3)">销量</button>
+                      <button class="s4 {{checkTabOrder == item+'-4'?'active':''}}" size="mini" plain @tap="reOrderList({{item}},4)"><text class="txt">价格</text>
+                      <block wx:if="{{checkTabOrder == item+'-4'}}">
+                        <text wx:if="{{!priceTag}}" class="iconfont icon-xiangxia1"></text><text wx:else class="iconfont icon-xiangshang1"></text>
+                      </block>
+                    </button>
+                  </view>
+              <view class="mlist1">
+               <view class="listbox1" bindtap="showDetail">
+                  <view class="avatar">
+                      <image class="tag" src="cloud://tuhe32-e323ac.7475-tuhe32-e323ac/images/pdd.png" mode='widthFix'></image>
+                    <image class="img" src="cloud://tuhe32-e323ac.7475-tuhe32-e323ac/images/p1.jpg" mode='widthFix'></image>
+                  </view>
+                  <view class="box">
+                    <view class="tit"><wxc-elip line="2">时尚运动套【领券1套仅57两套99】（每个ID限购5件）</wxc-elip></view>
+                    <view class="info">
+                      <view class="sales fr">销量 53件</view>
+                      <view class="commission fl">赚<text class="small">￥</text><text>4.33</text></view>
+                    </view>
+                    <view class="bt">
+                      <view class="coupon fr">
+                          <view class="txt"><text>20</text> 元券</view>
+                          <image class="img" src="../assets/images/quan.png" mode='widthFix'></image>
+                      </view>
+                      <view class="price fl"><view class="txt"> 券后</view><view class="cprice">￥<text>25.80</text></view></view>
+                    </view>
+                    <view class="bt1">
+                         <view class="post">包邮</view><text class="oprice">￥30.00</text>
+                    </view>
+                  </view>
+                </view>
+                <view class="listbox1" bindtap="showDetail">
+                  <view class="avatar">
+                      <image class="tag" src="cloud://tuhe32-e323ac.7475-tuhe32-e323ac/images/tb.png" mode='widthFix'></image>
+                    <image class="img" src="cloud://tuhe32-e323ac.7475-tuhe32-e323ac/images/p2.jpg" mode='widthFix'></image>
+                  </view>
+                  <view class="box">
+                    <view class="tit"><wxc-elip line="2">时尚运动套【领券1套仅57两套99】（每个ID限购5件）</wxc-elip></view>
+                    <view class="info">
+                      <view class="sales fr">销量 53件</view>
+                      <view class="commission fl">赚<text class="small">￥</text><text>4.33</text></view>
+                    </view>
+                    <view class="bt">
+                      <view class="coupon fr">
+                          <view class="txt"><text>20</text> 元券</view>
+                          <image class="img" src="../assets/images/quan.png" mode='widthFix'></image>
+                      </view>
+                      <view class="price fl"><view class="txt">券后</view><view class="cprice">￥<text>25.80</text></view></view>
+                    </view>
+                    <view class="bt1">
+                         <view class="post">包邮</view><text class="oprice">￥30.00</text>
+                    </view>
+                  </view>
+                </view>
+                <view class="listbox1" bindtap="showDetail">
+                  <view class="avatar">
+                      <image class="tag" src="cloud://tuhe32-e323ac.7475-tuhe32-e323ac/images/pdd.png" mode='widthFix'></image>
+                    <image class="img" src="cloud://tuhe32-e323ac.7475-tuhe32-e323ac/images/p1.jpg" mode='widthFix'></image>
+                  </view>
+                  <view class="box">
+                    <view class="tit"><wxc-elip line="2">时尚运动套【领券1套仅57两套99】（每个ID限购5件）</wxc-elip></view>
+                    <view class="info">
+                      <view class="sales fr">销量 53件</view>
+                      <view class="commission fl">赚<text class="small">￥</text><text>4.33</text></view>
+                    </view>
+                    <view class="bt">
+                      <view class="coupon fr">
+                          <view class="txt"><text>20</text> 元券</view>
+                          <image class="img" src="../assets/images/quan.png" mode='widthFix'></image>
+                      </view>
+                      <view class="price fl"><view class="txt">券后</view><view class="cprice">￥<text>25.80</text></view></view>
+                    </view>
+                    <view class="bt1">
+                         <view class="post">包邮</view><text class="oprice">￥30.00</text>
+                    </view>
+                  </view>
+                </view>
+                                <view class="bottomspace"></view>
+              </view>
+
+            </scroll-view>
+            </swiper-item> -->
+    </swiper>
+
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import api from '../api/api'
+  import baseMixin from '../mixins/baseMixin'
+  import WxUtils from '../utils/WxUtils'
+
+  export default class Index extends wepy.page {
+    config = {
+      navigationBarTitleText: '买好物',
+      usingComponents: {
+        'wxc-icon': '../packages/@minui/wxc-icon/dist/index',
+        'wxc-search': '../packages/@minui/wxc-search/dist/index',
+        'wxc-badge': '../packages/@minui/wxc-badge/dist/index',
+        'wxc-elip': '../packages/@minui/wxc-elip/dist/index',
+        'van-tab': '../components/vant-weapp/tab/index',
+        "van-tabs": '../components/vant-weapp/tabs/index'
+        // 'vant-action-sheet': '../packages/vant-weapp/dist/action-sheet/index.js',
+      }
+    }
+    components = {
+    }
+
+    mixins = [baseMixin]
+
+    data = {
+      types:[],
+      tab1: {
+        list: ['推荐', '美食', '母婴', '水果', '服饰', '百货', '美妆', '电器', '男装', '家纺', '鞋包', '运动', '手机' ],
+        scroll: true,
+        height: 44,
+        fixed: true,
+      },
+      currentTab:0,
+      winHeight:"",//窗口高度
+      categoryTop:0,
+      navagarorFloat:false,
+      checkTabOrder: 1,
+      priceTag:false,
+      imgUrls: [
+        'cloud://tuhe32-e323ac.7475-tuhe32-e323ac/images/banner.jpg',
+        'cloud://tuhe32-e323ac.7475-tuhe32-e323ac/images/banner.jpg',
+        'cloud://tuhe32-e323ac.7475-tuhe32-e323ac/images/banner.jpg'
+      ],
+      params:{
+        optId:null,
+        page:{ page: 1,pageSize:8},
+        sort: {order: null, sort: null}
+      },
+      loading:false,
+      isEnd:false,
+      noMoreData:false,
+      isHideLoadMore:true,
+      scrollTop:0
+
+    }
+
+    watch = {
+      currentTab(newValue, oldValue) {
+        this.changeTypeToGetProductList(newValue);
+      }
+    }
+
+    methods = {
+      goSearch() {
+        WxUtils.backOrNavigate('/pages/search')
+      },
+      reOrderList(index) {
+        index = parseInt(index)
+        let currentType = this.types[this.currentTab]
+        if(currentType.checkTabOrder == index && index != 4) return;
+        currentType.checkTabOrder = index
+        if(index == 4) currentType.priceTag = !currentType.priceTag
+        else currentType.priceTag = false
+        // this.$apply();
+
+        switch(index){
+          case 1:currentType.sort = {order:null,sort:null}; break;
+          case 2:currentType.sort = {order:'descending',sort:'promotionPrice'};break;
+          case 3:currentType.sort = {order:'descending',sort:'soldQuantity'};break;
+          case 4:if(currentType.priceTag) currentType.sort = {order:'ascending',sort:'minGroupPrice'};
+          else currentType.sort = {order:'descending',sort:'minGroupPrice'};break;
+        }
+        currentType.page.page = 1
+        console.log('[reOrderList currentTab]',currentType)
+        this.types[this.currentTab] = currentType
+        this.$apply()
+
+        this.initProductList(this.currentTab)
+
+      },
+      scrolltolower (){
+        console.log('[到达底部]')
+        let currentType = this.types[this.currentTab]
+        if(!this.loading && !currentType.isEnd) {
+          this.types[this.currentTab].page.page ++
+          // this.params.page.page = this.params.page.page +1
+          this.initProductList(this.currentTab)
+        }
+      },
+      showSearch() {
+        wx.navigateTo({
+          url: '/pages/search'
+        })
+      },
+      showNotice() {
+        wx.navigateTo({
+          url: '/pages/notice'
+        })
+      },
+      showDetail(id) {
+        if(id) WxUtils.backOrNavigate('/pages/detail?id='+id);
+        // if(id) WxUtils.backOrNavigate('/pages/detail?scene='+id+'-123');
+      },
+      showNine() {
+        WxUtils.backOrNavigate('/pages/nine');
+      },
+      showTimeLimit() {
+        WxUtils.backOrNavigate('/pages/timeLimit');
+      },
+      showBrand() {
+        WxUtils.backOrNavigate('/pages/brand');
+      },
+      showBurst() {
+        WxUtils.backOrNavigate('/pages/burst');
+      },
+      switchTab(e){
+        console.log('[switchTab]',e.detail.current)
+        this.currentTab = e.detail.current
+        this.$apply();
+      },
+      onTabChange(event) {
+        let selectedIndex = event.detail.index
+        console.log('[onTabChange]',selectedIndex)
+        this.currentTab = selectedIndex;
+        this.$apply();
+      }
+    }
+
+    events = {
+
+    }
+    changeTypeToGetProductList(selectedIndex) {
+      let currentType =  this.types[selectedIndex]
+      console.log('[changeTypeToGetProductList]',currentType)
+      let selectOptId = currentType?currentType.optId:null
+      // currentType.checkTabOrder = 1;
+      // this.params.optId = selectOptId;
+      // this.params.sort = {order:null,sort:null};
+      // this.params.page.page = 1
+      this.scrollTop = 0
+      this.$apply();
+      if(currentType && currentType.productList && currentType.productList.length > 0) {
+        // this.isEnd = false;
+        this.isHideLoadMore = true;
+        this.noMoreData = false
+        this.$apply();
+        return
+      }
+      this.initProductList(selectedIndex);
+    }
+    async initProductList(typeIndex) {
+      this.loading = true;
+      this.isHideLoadMore = false;
+      // this.$apply()
+      let currentType =  this.types[typeIndex]
+      currentType.isEnd = false;
+      let resp = await api.apiGetProductList(currentType);
+      if(resp&&resp.errMsg)return;
+      if(this.types != null) {
+        if(currentType.page.page == 1)  currentType.productList = resp.dataList
+        else currentType.productList = currentType.productList.concat(resp.dataList )
+      }
+      let productList = currentType.productList;
+      if(!this.optional(productList) || productList.length == 0 ) this.noMoreData = true;
+      else this.noMoreData = false;
+      if(!this.optional(resp.dataList) || resp.dataList.length < this.params.page.pageSize) currentType.isEnd = true;
+      this.types[typeIndex] = currentType
+      this.loading = false;
+      this.$apply();
+    }
+    async init () {
+      this.types = []
+      let resp = await api.apiProductTypes()
+      console.log('[resp]',resp)
+      if(resp&&resp.errMsg)return;
+      this.types = resp.productTypeList;
+      if(this.types) {
+        this.types.splice(0,0,{optName:'推荐',optId:null})
+        this.types.map(m => {
+          m.productList = []
+          m.page = this.modelCopy(this.params.page)
+          m.sort = this.modelCopy(this.params.sort)
+          m.checkTabOrder = 1
+          m.priceTag = false
+          m.isEnd = false
+        })
+        this.$apply();
+        this.initProductList(0);
+      }
+    }
+    async onLoad() {
+      console.log(76777)
+      let temp_url = wepy.getStorageSync('temp_url');
+      console.log('[temp_url]',temp_url)
+      if(temp_url){
+        await wepy.removeStorage({key: 'temp_url'});
+        WxUtils.backOrNavigate(temp_url);
+      }
+      var that = this;
+      //  高度自适应
+      wx.getSystemInfo( {
+        success: function( res ) {
+          var clientHeight=res.windowHeight,
+            clientWidth=res.windowWidth,
+            rpxR=750/clientWidth;
+          var  calc=clientHeight*rpxR-90;
+          console.log("[1111]",calc)
+          that.winHeight = calc;
+          that.$apply();
+          console.log("[222]",that.winHeight)
+          // that.setData( {
+          //     winHeight: calc
+          // });
+        }
+      });
+      this.init();
+    }
+  }
+</script>

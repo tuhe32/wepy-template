@@ -1,0 +1,302 @@
+<style lang="scss">
+  .canvas-box{
+    width: 100%;
+    position: fixed;
+    left: 0;
+    top: 999999rpx;
+  }
+</style>
+<template>
+    <view>
+        <view class="canvas-box">
+            <canvas canvas-id="myCanvas" style="width:{{windowWidth}}px;height:{{windowWidth*scale}}px;"></canvas>
+        </view>
+        <van-popup show="{{ popupShow }}"  position="top" class="popup_myshare">
+            <image src="{{previewMyShareImg}}" mode="widthFix" style="width: 100%"  />
+            <!-- <image src="../assets/images/hb1.jpg"  mode="widthFix"   /> -->
+            <!-- <button size="mini" class="btn_orange" @tap="saveShare()" plain>保存图片</button> -->
+        </van-popup>
+    </view>
+</template>
+<script>
+import wepy from 'wepy'
+//import zanPopup from './zanui/zan-popup'
+import http from '../utils/Http'
+import Tips from '../utils/Tips'
+
+export default class mySharePopup extends wepy.component {
+	config = {
+      usingComponents: {
+      	"van-popup": "vant-weapp/popup/index",
+      }
+    }
+  props = {
+    shareTitle:String,
+    shareImgUrl:String,
+    scene:String,
+    page:String,
+    isActivityProp:String,
+    productDetail:{},
+    // systemWidth:null,
+    windowWidth:750,
+  }
+
+  data = {
+    portrait_temp:null,
+    qrcode_temp:null,
+    windowHeight:2366,
+    scale:1.45,
+    previewMyShareImg:'',
+    isActivity:false,
+    popupShow:false,
+  }
+
+  components = {
+  }
+
+  methods = {
+    closePopup(){
+      this.toggleSharePopup();
+    },
+    saveShare() {
+      // this.saveMyShare();
+      this.toggleSharePopup();
+    },
+    makeShareCanvas() {
+      console.log('[components]',this.shareImgUrl)
+      console.log('[components scene]',this.scene)
+      console.log('[components page]',this.page)
+      console.log('[components page]',this.windowWidth)
+      let imgUrl = ""
+      if(this.shareImgUrl.indexOf("https") > -1)  imgUrl = this.shareImgUrl
+      else imgUrl = this.shareImgUrl.replace(/^http/,"https")
+      console.log('[NO NO imgUrl]',imgUrl)
+      // this.$apply()
+      // console.log('[components productDetail]',this.productDetail)
+      // this.isActivity = this.isActivityProp != null && this.isActivityProp != undefined && this.isActivityProp != ''?true:false;
+      var that = this;
+      wx.downloadFile({
+          url: imgUrl,
+          // header: http.createAuthHeaderFile(),
+          success: function (res1) {
+               //缓存头像图片
+              // console.log(res1.width)
+              // console.log(res1.height)
+              that.portrait_temp= res1.tempFilePath
+              console.log('[ http.baseUrl]', that.portrait_temp);
+              //缓存canvas绘制小程序二维码
+              wx.downloadFile({
+                  url: http.baseUrl+'weixin/product/generateWxQrCode?scene='+that.scene+'&page='+that.page,
+                  // url: that.shareImgUrl,
+                  header: http.createAuthHeaderFile(),
+                  success: function (res2) {
+                      console.log('返回的小程序码',res2)
+                      console.log('二维码：' + res2.tempFilePath)
+                      //缓存二维码
+                      that.qrcode_temp= res2.tempFilePath
+                      that.$apply();
+                      console.log('开始绘制图片')
+                      that.drawImage()
+                     
+                  }
+              })
+          },
+          fail:err => {
+            console.log('[下载失败]',err)
+          }
+      })
+    }
+  }
+
+  drawImage() {
+    var that = this;
+    const ctx = wx.createCanvasContext('myCanvas')
+    var bgPath = '../assets/images/sharebg.jpg'
+    // var bgPath = that.currentUser.headImgUrl;
+    // if(that.isActivity) bgPath = that.portrait_temp;
+    var portraitPath = that.portrait_temp;
+    // var hostNickname = that.currentUser.nickName
+
+    var qrPath = that.qrcode_temp
+    var windowWidth = that.windowWidth
+    var shareTitle = that.shareTitle
+    var productDetail = that.productDetail
+    that.scale= 1.45
+    that.$apply();
+    ctx.width = windowWidth
+    ctx.height = that.scale * windowWidth
+    //绘制背景图片
+    ctx.drawImage(bgPath, 0, 0, windowWidth, that.scale * windowWidth)
+    ctx.save()
+    //绘制产品详情图
+    // if(!that.isActivity)
+    ctx.drawImage(portraitPath, 0  , 0,  windowWidth,  windowWidth)
+    //绘制头像
+    ctx.save()
+    // ctx.beginPath()
+    // ctx.arc(windowWidth / 2, 0.32 * windowWidth, 0.15 * windowWidth, 0, 2 * Math.PI)
+    // ctx.clip()
+    // ctx.drawImage(portraitPath, 0.7 * windowWidth / 2, 0.17 * windowWidth, 0.3 * windowWidth, 0.3 * windowWidth)
+    // ctx.restore()
+    // if(productDetail){
+      //绘制第一段文本
+      let contentHh = 13 * 1.3;
+      let nums =  parseInt(0.55* windowWidth/contentHh)*2+4
+      console.log('[text nums ]',nums)
+      const CONTENT_ROW_LENGTH = nums;  // 正文 单行显示字符长度
+      let [contentLeng, contentArray, contentRows] = this.textByteLength(productDetail.goodsName, CONTENT_ROW_LENGTH)
+      ctx.setFontSize(13)
+      ctx.setTextAlign('left')
+      for (let m = 0; m < contentArray.length; m++) {
+        if(m > 1) break;
+        let text = contentArray[m]
+        if(m == 1) text = text +'...'
+        ctx.fillText(text, 0.04* windowWidth, 1.08 * windowWidth + contentHh * m);
+      }
+      ctx.font = 'normal bold 32px Arial,sans-serif'
+      ctx.setFontSize(14)
+      ctx.setFillStyle('#ff0')
+      ctx.fillText(productDetail.promotionPrice, 0.12* windowWidth, 1.248 * windowWidth)
+      ctx.fillText(productDetail.couponDiscount/100, 0.402* windowWidth, 1.351 * windowWidth)
+      ctx.setFontSize(18)
+      ctx.setFillStyle('#f00')
+      ctx.fillText(productDetail.voucherPrice, 0.14 * windowWidth, 1.365 * windowWidth)
+      ctx.setFillStyle('#999')
+      ctx.setFontSize(12)
+      ctx.fillText('原价'+productDetail.minGroupPrice/100, 0.364 * windowWidth, 1.248 * windowWidth)
+    // }
+    // //绘制第二段文本
+    // ctx.setFillStyle('#ffffff')
+    // ctx.setFontSize(0.037 * windowWidth)
+    // ctx.setTextAlign('center')
+    // ctx.fillText('邀请你一起来领券抢红包啦~', windowWidth / 2, 0.57 * windowWidth)
+    //绘制二维码
+    ctx.drawImage(qrPath, 0.62 * windowWidth , 1.04 * windowWidth, 0.33 * windowWidth, 0.33 * windowWidth)
+    // //绘制第三段文本
+    // ctx.setFillStyle('#ffffff')
+    // ctx.setFontSize(0.037 * windowWidth)
+    // ctx.setTextAlign('center')
+    // ctx.fillText('长按二维码领红包', windowWidth / 2, 1.36 * windowWidth)
+    ctx.draw();
+    setTimeout(function () {
+        that.canvasToImage()
+    }, 400)
+  }
+  canvasToImage() {
+    // this.initData()
+    var that = this
+    wx.canvasToTempFilePath({
+      // x: 0,
+      // y: 0,
+      // width: that.windowWidth,
+      // height: that.windowWidth * that.scale,
+      // destWidth: that.windowWidth ,
+      // destHeight: that.windowWidth  * that.scale,
+      canvasId: 'myCanvas',
+      success: function (res) {
+        console.log('朋友圈分享图生成成功:' + res.tempFilePath)
+        // wx.previewImage({
+        //     current: res.tempFilePath, // 当前显示图片的http链接
+        //     urls: [res.tempFilePath] // 需要预览的图片http链接列表
+        // })
+        that.previewMyShareImg = res.tempFilePath
+        Tips.loaded();
+        that.$apply();
+        // that.saveMyShare()
+        that.toggleSharePopup();
+        Tips.loading('图片生成中...');
+        setTimeout(function () {
+            that.saveMyShare()
+        }, 1200)
+      },
+      fail: function (err) {
+        Tips.loaded();
+        console.log(err)
+      }
+    })
+  }
+  saveMyShare() {
+    if(!this.previewMyShareImg)return;
+    wx.saveImageToPhotosAlbum({
+      filePath: this.previewMyShareImg,
+      success: function(res) {
+        // console.log('[保存分享图]',res)
+        Tips.success('保存成功！');
+        // var savedFilePath = res.savedFilePath
+      },
+      fail:err => {
+        wx.getSetting({
+          success(res) {
+            console.log('[getSetting]',res)
+            if (!res.authSetting['scope.saveImageToPhotosAlbum']) {
+               // console.log(123123)
+               Tips.loaded();
+               Tips.confirm('请授权保存图片').then(() => {
+                wx.openSetting({
+                    success (res) {
+                      console.log(res.authSetting)
+                    }
+                  })
+               });
+            }
+          }
+        })
+      },
+      complete:() =>{
+        Tips.loaded();
+      }
+    })
+    this.toggleSharePopup()
+    
+  }
+  toggleSharePopup() {
+    this.popupShow = !this.popupShow
+    this.$apply()
+    // this.$invoke('sharePopup', 'togglePopup')
+  }
+  showPreview(imgList,index){
+    this.previewImg = [];
+    imgList.forEach(m=>{
+      this.previewImg.push(m.imageUrl);
+    })
+    this.currentImg = index
+    this.$apply()
+    this.toggleSwiperPopup();
+  }
+  initData() {
+    this.portrait_temp = null
+    this.qrcode_temp = null
+    // this.shareTitle = ''
+    // this.productDetail = {}
+  }
+  textByteLength(text,num){  // text为传入的文本  num为单行显示的字节长度
+    let strLength = 0; // text byte length
+    let rows=1;
+    let str=0;
+    let arr=[];
+    for (let j = 0; j < text.length; j++) {
+      if (text.charCodeAt(j) > 255) {
+        strLength += 2;
+        if (strLength > rows * num) {
+          strLength++;
+          arr.push(text.slice(str, j));
+          str = j;
+          rows++;
+        }
+      } else {
+        strLength++;
+        if (strLength > rows * num) {
+          arr.push(text.slice(str, j));
+          str = j;
+          rows++;
+        }
+      }
+    }
+    arr.push(text.slice(str, text.length));
+    return [strLength, arr, rows]   //  [处理文字的总字节长度，每行显示内容的数组，行数]
+  }
+
+
+
+}
+</script>

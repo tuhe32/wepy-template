@@ -1,0 +1,157 @@
+<style lang="scss">
+  .search{background: #fff;}
+  .search-wrap {
+     position:fixed;
+     top:0;
+     z-index: 1000;
+     width: 100%;
+   }
+  .van-search .van-field{border-radius:100rpx;}
+  .searchbtn{color: #fff;}
+  .search_history{position: fixed;width: 100%; height: 100%; z-index: 101; background: #fff; text-align: left;}
+  .search_history .tit{margin: 120rpx 50rpx 0 50rpx;  font-size:34rpx; color: #464646;}
+  .search_history .box{margin: 30rpx; display: flex; flex-wrap:wrap; align-items: flex-start; justify-content: flex-start;}
+  .search_history .box button{border-radius: 100rpx;border: 0; background: #f3f3f3; font-size: 30rpx; margin:10rpx; color: #666;}
+  .search_history .box button.btn_hover{background: #f90; color: #fff;}
+  .sort{padding: 0 10rpx; background: #fff; height: 80rpx; line-height: 80rpx; display: flex; border-bottom:2rpx #eeeeee solid;}
+  .sort button{width: 23%; height: 80rpx; line-height: 80rpx; overflow: hidden; border: 0; color: #999; font-size: 30rpx; position: relative;}
+  .sort button.active{color: #333;}
+  .sort .s4{display: flex; padding: 0; justify-content: center;}
+  .sort .s4 .txt{}
+  .sort .s4 .iconfont{color: #ccc; font-size:16rpx; margin-left:10rpx;}
+  .sort .s4.active .iconfont{color: #333;}
+  .sort.fixed{width: 100%; position: fixed; top:90rpx; z-index:100;}
+  .mlist1.mt{margin-top: 80rpx;}
+</style>
+<template>
+  <view class="container search">
+	  	<view class="search-wrap">
+	  		<van-search
+					  value="{{value}}"
+					  placeholder="搜索优惠商品"
+					  use-action-slot
+					  bind:change="onChange"
+					  bind:search="onSearch"
+            bind:cancel="onCancel"
+					  background="#f90"
+					>
+					  <view slot="action" class="searchbtn" bind:tap="onSearch">搜索</view>
+					</van-search>
+		  </view>
+		  <scroll-view scroll-y="true" class="scoll-h">
+	  		<view class="search_history" wx:if="{{productList.length == 0}}">
+	  			<view class="tit">热搜</view>
+	  			 <view class="box">
+            <block wx:for="{{hotSearchList}}" wx:key="index">
+              <button hover-class="btn_hover" @tap="onSearch({{item}})" plain>{{item}}</button>
+            </block>
+	  			 </view>
+	  		</view>
+	  		<view class="mlist1 mt" wx:else >
+	            <view class="listbox1" wx:for="{{productList}}" wx:key="index" bindtap="showDetail({{item.id}})">
+	              <view class="avatar">
+	                <image class="tag" src="cloud://tuhe32-e323ac.7475-tuhe32-e323ac/images/pdd.png" mode='widthFix'></image>
+	                <image class="img" src="{{item.goodsThumbnailUrl}}" mode='widthFix'></image>
+	              </view>
+	              <view class="box">
+	                <view class="tit"><wxc-elip line="2">{{item.goodsName}}</wxc-elip></view>
+	                <view class="info">
+	                  <view class="sales fr">销量 {{item.soldQuantity}}件</view>
+	                  <view class="commission fl">赚<text class="small">￥</text><text>{{item.promotionPrice?item.promotionPrice:0}}</text></view>
+	                </view>
+	                <view class="bt">
+	                  <view class="coupon fr">
+	                    <view class="txt"><text>{{item.couponDiscount/100 }}</text> 元券</view>
+	                    <image class="img" src="../assets/images/quan.png" mode='widthFix'></image>
+	                  </view>
+	                  <view class="price fl"><view class="txt"> 券后</view><view class="cprice">￥<text>{{item.voucherPrice }}</text></view></view>
+	                </view>
+	                <view class="bt1">
+	                  <view class="post">包邮</view><text class="oprice">￥30.00</text>
+	                </view>
+	              </view>
+	            </view>
+	            <view class="bottomspace"></view>
+	          </view>
+  		</scroll-view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import api from '../api/api'
+  import baseMixin from '../mixins/baseMixin'
+  import WxUtils from '../utils/WxUtils'
+  import Tips from '../utils/Tips'
+
+  export default class Search extends wepy.page {
+    config = {
+      navigationBarTitleText: '搜索',
+      usingComponents: {
+        'wxc-elip': '../packages/@minui/wxc-elip/dist/index',
+        'van-search': '../components/vant-weapp/search/index',
+      }
+    }
+    components = {
+    }
+
+    mixins = [baseMixin]
+
+    data = {
+      value:'',
+      params:{
+        key:null,
+        page:{ page: 1,pageSize:5},
+        sort: {order: null, sort: null}
+      },
+      productList:[],
+      hotSearchList:['纸巾','短袖','婴儿','童装','套装','运动鞋'],
+    }
+
+    computed = {
+
+    }
+
+    methods = {
+      onChange(e) {
+      	this.value = e.detail
+        if(!this.optional(this.value)) this.productList = []
+      	this.$apply()
+      },
+      onCancel() {
+        console.log('onCancel')
+        this.productList = [];
+        this.$apply()
+      },
+      async onSearch(key) {
+      	console.log('[value]',this.value)
+        let searchKey = ''
+        if(this.optional(key))searchKey = key
+        else if(this.optional(this.value))searchKey = this.value
+      	if(this.optional(searchKey)) {
+      		this.params.key = searchKey
+      		this.$apply()
+      		let resp = await api.apiGetProductList(this.params)
+          if(resp&&resp.errMsg)return;
+      		if(resp && resp.dataList.length > 0) {
+      			this.productList = resp.dataList
+      			this.$apply()
+      		}else Tips.alert('找不到该商品')
+      	}
+      },
+      showDetail(id) {
+        if(id) WxUtils.backOrNavigate('/pages/detail?id='+id);
+      },
+
+
+    }
+
+    events = {
+
+    }
+
+    onLoad() {
+
+    }
+  }
+</script>

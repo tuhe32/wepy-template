@@ -1,0 +1,127 @@
+<style lang="scss" src="./assets/styles/base.scss"></style>
+<style lang="scss" src="./assets/styles/iconfont.scss"></style>
+
+<script>
+import wepy from 'wepy'
+import 'wepy-async-function'
+
+import { setStore } from 'wepy-redux'
+import configStore from './store'
+
+const store = configStore()
+setStore(store)
+
+export default class extends wepy.app {
+  config = {
+    pages: [
+    	'pages/index',
+      'pages/login',
+    	'pages/search',
+      'pages/detail',
+			'pages/help',
+      'pages/user/favorite',
+      'pages/user/index',
+      'pages/user/set',
+      'pages/user/withdraw',
+      'pages/user/order',
+      'pages/user/contact',
+    ],
+    window: {
+      backgroundTextStyle: 'light',
+      navigationBarBackgroundColor: '#ffffff',
+      navigationBarTitleText: 'WeChat',
+      navigationBarTextStyle: 'black'
+    },
+    'tabBar': {
+      'color': '#666666',
+      'selectedColor': '#f60',
+      'borderStyle': 'white',
+      'backgroundColor': '#f9f9f9',
+      'list': [
+        {
+          'iconPath': 'assets/images/home.png',
+          'selectedIconPath': 'assets/images/home-active.png',
+          'pagePath': 'pages/index',
+          'text': '首页'
+        },
+        {
+          'iconPath': 'assets/images/cart.png',
+          'selectedIconPath': 'assets/images/cart-active.png',
+          'pagePath': 'pages/help',
+          'text': '报表'
+        },
+        {
+          'iconPath': 'assets/images/user.png',
+          'selectedIconPath': 'assets/images/user-active.png',
+          'pagePath': 'pages/user/index',
+          'text': '我的'
+        }
+      ]
+    }
+  }
+
+  globalData = {
+    userInfo: null,
+    // baseUrl:'https://pinkeweixinadmin.51maihaowu.com/'
+	  baseUrl:'http://localhost:9001/'
+  }
+
+  constructor () {
+    super()
+    this.use('requestfix')
+    this.use('promisify');
+    this.intercept('request', {
+      config (p) {
+        p.header = this.createAuthHeader();
+        return p;
+      }
+    });
+  }
+
+   /**
+   * 构造权限头部
+   */
+  createAuthHeader () {
+    let token = wepy.$instance.globalData.token;
+    const header = {};
+    // header['Content-Type'] = 'application/x-www-form-urlencoded'
+    if(token == null || token == undefined || token == '')
+      token = wepy.getStorageSync("token")
+    // token = '1234';
+    if (token) {
+      header['token'] = token;
+    }
+    return header;
+  }
+
+  onLaunch() {
+    // this.testAsync()
+  }
+
+  sleep (s) {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        resolve('promise resolved')
+      }, s * 1000)
+    })
+  }
+
+  async testAsync () {
+    const data = await this.sleep(3)
+    console.log(data)
+  }
+
+  getUserInfo(cb) {
+    const that = this
+    if (this.globalData.userInfo) {
+      return this.globalData.userInfo
+    }
+    wepy.getUserInfo({
+      success (res) {
+        that.globalData.userInfo = res.userInfo
+        cb && cb(res.userInfo)
+      }
+    })
+  }
+}
+</script>

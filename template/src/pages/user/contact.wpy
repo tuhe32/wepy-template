@@ -1,0 +1,94 @@
+<style lang="scss">
+  .contact{height: 100%; overflow: hidden;}
+  .contact .top{width: 100%; height: auto; overflow: hidden;}
+  .contact .top image{width: 100%; display: block;}
+	.contact .box{margin:30rpx 10%; height: auto; overflow: hidden; text-align:center; }
+	.contact .box .tit{font-size: 30rpx; color: #454545; margin: 30rpx 0 20rpx 0;}
+	.contact .box .tit text{font-size:40rpx; color: #f60;}
+	.contact .box .tit text.icon-weixin1{color:#50bd83;}
+	.contact .box .tit text.icon-QQ{color:#3a95ef;}
+	.contact .box .tit text.icon-renwu{color:#f60;}
+	.contact .box .con{font-size:30rpx; height:60rpx; line-height: 60rpx; overflow: hidden;background: #fff; border-radius:15rpx;}
+	.contact .box .con .txt{ font-size: 32rpx; color: #333; text-align: center;}
+	.contact .box .con button{float: right; height: 60rpx; line-height: 60rpx; font-size: 30rpx;}
+	.contact .box .con .btn_green{background:#50bd83; color: #fff; border: 0;}
+	.contact .box .con .btn_blue{background:#3a95ef;}
+	.contact .box .con .btn_orange{background: #f60;}
+	.contact .tips{font-size: 28rpx; color: #999; text-align: center; padding: 20rpx 30rpx;}
+</style>
+<template>
+  <view class="container contact">
+			<view class="top">
+				<image src="../../assets/images/contactbg.jpg" mode='widthFix' ></image>
+			</view>
+			<view class="box">
+				 	<view class="tit"><text class="iconfont icon-weixin1"></text> 客服微信号</view>
+					<view class="con">
+						  <button class="btn_green" plain>复制</button>
+						  <view class="txt">maihaowuguanfang</view>
+					</view>
+			</view>
+			<view class="box">
+				 	<view class="tit"><text class="iconfont icon-QQ"></text> 客服QQ号</view>
+					<view class="con">
+						  <button class="btn_blue" plain>复制</button>
+						  <view class="txt">898538121</view>
+					</view>
+			</view>
+			<view class="box">
+				 	<view class="tit"><text class="iconfont icon-renwu"></text> 联合创始人升级请微信联系</view>
+					<view class="con">
+						  <button class="btn_orange" plain>复制</button>
+						  <view class="txt">maihaowuguanfang</view>
+					</view>
+			</view>
+			<view class="tips">关注公众号：51买好物  -----及时了解最新活动信息</view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import testMixin from '../../mixins/test'
+
+  export default class Withdraw extends wepy.page {
+    config = {
+      navigationBarTitleText: '联系我们',
+      usingComponents: {
+      	'van-search': '../../components/vant-weapp/search/index',
+      	"van-cell": "../../components/vant-weapp/cell/index",
+      	"van-cell-group": "../../components/vant-weapp/cell-group/index",
+      },
+    }
+    components = {
+    }
+
+    mixins = [testMixin]
+
+    data = {
+    	poster:[
+    		{ item: 0, img: "../../assets/images/hb1.jpg" },
+    		{ item: 1, img: "cloud://tuhe32-e323ac.7475-tuhe32-e323ac/images/hb2.jpg" },
+    		{ item: 2, img: "../../assets/images/hb1.jpg" },
+    	]
+    }
+    methods = {
+      onTabChange(event) {
+        let selectedId = event.detail.index+1
+        console.log('[选择tab]',selectedId)
+        // let {componentId} = event.source;
+        this.currentTab = selectedId;
+//      this.init();
+        this.$apply();
+//      this.getBuyList();
+      },
+    }
+
+    events = {
+
+    }
+
+    onLoad() {
+
+    }
+  }
+</script>

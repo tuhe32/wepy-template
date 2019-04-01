@@ -1,0 +1,147 @@
+<style lang="scss">
+  .order{height: auto;}
+  .vanTab{}
+  .van-tabs .van-tabs__wrap{position: fixed; top:0}
+  .vanTab .van-tabs__nav .van-tab{font-size: 30rpx; color: #999; flex: auto;}
+  .van-tabs .van-tab::after{content:''; display: block; height:50rpx; position:absolute; right: 0; top:20rpx; border-right:2rpx #eeeeee solid;}
+	.van-tabs .van-tab:last-child::after{display: none;}
+  .vanTab .van-tabs__nav .van-tab--active{color: #333;}
+  .vanTab .van-tabs__nav  .van-tabs__line{background-color: #333;}
+  .orderbox{margin: 20rpx 20rpx; text-align: left; height: auto; overflow: hidden; border-radius: 10rpx; background: #fff; box-shadow:0 3rpx 5rpx #eeeeee;}
+	.orderbox .box_t{padding:0rpx 30rpx 20rpx 30rpx; font-size: 30rpx; color: #666; display: flex; flex-wrap: wrap; border-bottom:2rpx #eeeeee solid;}
+	.orderbox .box_t .user{width:40%; }
+ 	.orderbox .box_t .user .headimg{width:70rpx; height:70rpx; display: block; float: left; margin:5rpx 10rpx 0 0; border-radius: 100%; border:2rpx #fff solid; }
+ 	.orderbox .box_t .user .name{font-size: 30rpx; color: #333; margin-top:25rpx;}
+ 	.orderbox .box_t .num{width:100%;margin-top:20rpx;}
+ 	.orderbox .box_t .time{width:100%;margin-top:10rpx;}
+ 	.orderbox .box_t .cprice{width:40%;margin-top: 25rpx;}
+ 	.orderbox .box_t .cprice text{color: #f30; font-size: 36rpx;}
+ 	.orderbox .box_c{padding:10rpx 0;}
+</style>
+<template>
+  <view class="container order">
+      <van-tabs class="vanTab" active="{{ currentTab }}" bind:change="onTabChange">
+      	<block wx:for="{{typeList}}" wx:key="index">
+      		<van-tab title="{{item}}" >
+      			<scroll-view scroll-y="true" class="scoll-h" scroll-top="{{scrollTop}}" bindscrolltolower="scrolltolower" lower-threshold="100">
+		    		<view class="orderbox" wx:for="{{orderList}}" wx:key="index">
+		    			<view class="box_t">
+		    				 <view class="num">订单号：{{item.orderSn}}</view>
+		    				 <view class="time">下单时间：{{item.orderCreateTime}}</view>
+		    				 <!-- view class="user">
+		    				 		<image src="cloud://tuhe32-e323ac.7475-tuhe32-e323ac/images/head_man.jpg" class="headimg" mode='widthFix' ></image>
+		    				 		<view class="name">刘德华</view>
+		    				 </view> -->
+		    				 <view class="cprice">总额：￥<text>{{item.orderAmount/100}}</text></view>
+		    			</view>
+		    			<view class="box_c">
+			    			<view class="listbox1" bindtap="showDetail">
+			                  <view class="avatar">
+			                  	<image class="tag" src="cloud://tuhe32-e323ac.7475-tuhe32-e323ac/images/pdd.png" mode='widthFix'></image>
+			                    <image class="img" src="{{item.goodsThumbnailUrl}}" mode='widthFix'></image>
+			                  </view>
+			                  <view class="box">
+			                    <view class="tit"><wxc-elip line="2">{{item.goodsName}}</wxc-elip></view>
+			                    <!-- <view class="info">
+			                      <view class="sales fr">销量 53件</view>
+			                      <view class="commission fl">赚<text class="small">￥</text><text>4.33</text></view>
+			                    </view> -->
+			                    <view class="bt">
+			                      <!-- <view class="coupon fr">
+			                      	<view class="txt"><text>20</text> 元券</view>
+			                      	<image class="img" src="../../assets/images/quan.png" mode='widthFix'></image>
+			                      </view> -->
+			                      <view class="price fl"><view class="txt"> 券后</view><view class="cprice">￥<text>{{item.orderAmount/100}}</text></view></view>
+			                    </view>
+			                    <view class="bt1">
+			                    	 <view class="num fr">数量 x <text>{{item.goodsQuantity}}</text></view>
+			                    	 <!-- <view class="post">包邮</view> -->
+			                    	 <text class="oprice">原价￥{{item.goodsPrice/100}}</text>
+			                    </view>
+			                  </view>
+			                </view>
+		    			</view>
+		    		</view>
+		    	</scroll-view>
+	        </van-tab>
+      	</block>
+      </van-tabs>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import api from '../../api/api'
+  import baseMixin from '../../mixins/baseMixin'
+  import Lang from '../../utils/Lang'
+
+  export default class Order extends wepy.page {
+    config = {
+      navigationBarTitleText: '我的订单',
+      usingComponents: {
+      	'van-tab': '../../components/vant-weapp/tab/index',
+        "van-tabs": '../../components/vant-weapp/tabs/index',
+      },
+    }
+    components = {
+    }
+
+    mixins = [baseMixin]
+
+    data = {
+    	typeList:['全部','已付款未收货','已完成'],
+  		currentTab:0,
+  		orderList:[],
+  		scrollTop:0,
+  		params:{
+	      orderStatus:null,
+	      page:{ page: 1,pageSize:10},
+	      sort: {order: null, sort: null}
+	    },
+	    loading:false,
+	    isEnd:false
+    }
+    methods = {
+      onTabChange(event) {
+        let selectedId = event.detail.index+1
+        console.log('[选择tab]',selectedId)
+        switch(selectedId) {
+        	case 1:this.params.orderStatus = null;break;
+        	case 2:this.params.orderStatus = 1;break;
+        	case 3:this.params.orderStatus = 2;break;
+        }
+        this.params.page.page = 1
+        this.$apply();
+     	this.initOrderList();
+      },
+      scrolltolower() {
+      	if(!this.loading && !this.isEnd) {
+          this.params.page.page ++
+          // this.params.page.page = this.params.page.page +1
+          this.initOrderList()
+        }
+      }
+    }
+
+    async initOrderList() {
+      this.loading = true
+    	let resp = await api.apiMyOrderList(this.params);
+      if(resp&&resp.errMsg) return;
+    	if(resp) {
+    		console.log('[orderList]',resp)
+    		resp.dataList.map(m => {
+    			m.orderCreateTime = Lang.dateFormate(new Date(m.orderCreateTime*1000),'yyyy-MM-dd hh:ss')
+    		})
+    		this.orderList = resp.dataList;
+    		this.$apply()
+    	}
+    	if(!this.optional(resp.dataList) || resp.dataList.length < this.params.page.pageSize) this.isEnd = true;
+    	else this.isEnd = false;
+    	this.loading = false
+    }
+
+    onLoad() {
+    	this.initOrderList();
+    }
+  }
+</script>
