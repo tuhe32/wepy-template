@@ -58,7 +58,8 @@ module.exports={
         "tsconfig.json": "lint"
     },
     skipInterpolation: [
-      "index.wpy","help.wpy","login.wpy","search.wpy","detail.wpy","contact.wpy","favorite.wpy","order.wpy","set.wpy","withdraw.wpy"
+      "src/pages/index.wpy","src/pages/help.wpy","src/pages/login.wpy","src/pages/search.wpy","src/pages/detail.wpy",
+      "src/pages/user/contact.wpy","src/pages/user/favorite.wpy","src/pages/user/order.wpy","src/pages/user/set.wpy","src/pages/user/withdraw.wpy"
     ],
     
     complete: function (data,{chalk}) {
