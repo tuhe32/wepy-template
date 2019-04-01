@@ -58,7 +58,7 @@ module.exports={
         "tsconfig.json": "lint"
     },
     skipInterpolation: [
-      "!**.wpy","!**.wxml"
+      "!src/pages/**.wpy","!src/pages/user/**.wpy","!src/components/vant-weapp/**/**.wxml"
     ],
     
     complete: function (data,{chalk}) {
