@@ -39,7 +39,7 @@ module.exports={
             '项目创建后，你必须得安一下包依赖，不懂就去百度',
           choices: [
             {
-              name: 'OK,用 Yarn 安吧',
+              name: ' OK ，用 Yarn安吧',
               value: 'yarn',
               short: 'yarn',
             },
