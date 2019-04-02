@@ -28,6 +28,10 @@ module.exports={
             type: 'string',
             required: true,
             message: '小程序的appID,没有就找个复制上',
+            validate (val) {
+              if (val === '') return '你得填一个，不然微信开发者工具你也打不开，你还玩个屁'
+              return true
+            }
         },
         autoInstall: {
           type: 'list',
