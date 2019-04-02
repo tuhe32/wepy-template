@@ -1,5 +1,5 @@
 {
-	"description": "a co-worker project",
+	"description": "{{ description }}",
 	"setting": {
 		"urlCheck": false,
 		"es6": false,

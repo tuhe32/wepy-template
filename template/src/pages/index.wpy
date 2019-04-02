@@ -35,10 +35,14 @@
     border-bottom:1rpx #eeeeee solid;
   }
   .home .vanTab .van-tab--active{color: #f30;}
-  .topbar .search {
+  .topbar .search  {
     flex: 1;
     margin: 0 16rpx 0 24rpx;
   }
+	.topbar .search .van-search__field .van-field{
+		background: #eee;
+		border-radius: 100rpx;
+	}
   .topbar .iconfont{font-size: 40rpx;}
   .topbar .top_notice{margin:16rpx 30rpx 0 0; color: #666;}
   .user__un-read-msg-count {
@@ -57,16 +61,14 @@
   .menu .m2{width:430rpx; float: right; margin-bottom:15rpx;}
   .menu .m3{width:210rpx; float: right;}
   .menu .m4{width:210rpx; float: right; margin-left: 13rpx;}
-
   .topspace{height:70rpx; overflow: hidden; display: block; width: 100%;}
   .bottomspace{height:80rpx; overflow: hidden; display: block; width: 100%;}
 </style>
 <template>
   <view class="container home">
     <view class="topbar">
-      <wxc-search class="search" radius="30" mode="static" align="center" @tap="goSearch" placeholder="搜索优惠商品" bg-color="#f6f6f6"></wxc-search>
+			 <van-search v-model="searchvalue" placeholder="搜索优惠商品" background="#fff" class="search" @search="onSearch" />
       <view class="top_notice iconfont icon-lingdang fr" bindtap="showNotice"></view>
-      <wxc-badge class="user__un-read-msg-count">0</wxc-badge>
     </view>
     <van-tabs class="vanTab" active="{{ currentTab }}" bind:change="onTabChange">
       <van-tab wx:for="{{types}}" wx:key="index" title="{{item.optName}}"></van-tab>
@@ -104,7 +106,7 @@
                 <image class="img" src="{{item.goodsThumbnailUrl}}" mode='widthFix'></image>
               </view>
               <view class="box">
-                <view class="tit"><wxc-elip line="2">{{item.goodsName}}</wxc-elip></view>
+                <view class="tit">{{item.goodsName}}</view>
                 <view class="info">
                   <view class="sales fr">销量 {{item.soldQuantity}}件</view>
                   <view class="commission fl">赚<text class="small">￥</text><text>{{item.promotionPrice?item.promotionPrice:0}}</text></view>
@@ -117,155 +119,16 @@
                   <view class="price fl"><view class="txt"> 券后</view><view class="cprice">￥<text>{{item.voucherPrice }}</text></view></view>
                 </view>
                 <view class="bt1">
-                  <!--<view class="post"></view>--><text class="oprice">原价:￥{{item.minGroupPrice/100}}</text>
+                  <text class="oprice">原价:￥{{item.minGroupPrice/100}}</text>
                 </view>
               </view>
             </view>
-            <!--    <view class="listbox1" bindtap="showDetail">
-                 <view class="avatar">
-                     <image class="tag" src="cloud://tuhe32-e323ac.7475-tuhe32-e323ac/images/tb.png" mode='widthFix'></image>
-                   <image class="img" src="cloud://tuhe32-e323ac.7475-tuhe32-e323ac/images/p2.jpg" mode='widthFix'></image>
-                 </view>
-                 <view class="box">
-                   <view class="tit"><wxc-elip line="2">时尚运动套【领券1套仅57两套99】（每个ID限购5件）</wxc-elip></view>
-                   <view class="info">
-                     <view class="sales fr">销量 53件</view>
-                     <view class="commission fl">赚<text class="small">￥</text><text>4.33</text></view>
-                   </view>
-                   <view class="bt">
-                     <view class="coupon fr">
-                         <view class="txt"><text>20</text> 元券</view>
-                         <image class="img" src="../assets/images/quan.png" mode='widthFix'></image>
-                     </view>
-                     <view class="price fl"><view class="txt">券后</view><view class="cprice">￥<text>25.80</text></view></view>
-                   </view>
-                   <view class="bt1">
-                        <view class="post">包邮</view><text class="oprice">￥30.00</text>
-                   </view>
-                 </view>
-               </view>
-               <view class="listbox1" bindtap="showDetail">
-                 <view class="avatar">
-                     <image class="tag" src="cloud://tuhe32-e323ac.7475-tuhe32-e323ac/images/pdd.png" mode='widthFix'></image>
-                   <image class="img" src="cloud://tuhe32-e323ac.7475-tuhe32-e323ac/images/p1.jpg" mode='widthFix'></image>
-                 </view>
-                 <view class="box">
-                   <view class="tit"><wxc-elip line="2">时尚运动套【领券1套仅57两套99】（每个ID限购5件）</wxc-elip></view>
-                   <view class="info">
-                     <view class="sales fr">销量 53件</view>
-                     <view class="commission fl">赚<text class="small">￥</text><text>4.33</text></view>
-                   </view>
-                   <view class="bt">
-                     <view class="coupon fr">
-                         <view class="txt"><text>20</text> 元券</view>
-                         <image class="img" src="../assets/images/quan.png" mode='widthFix'></image>
-                     </view>
-                     <view class="price fl"><view class="txt">券后</view><view class="cprice">￥<text>25.80</text></view></view>
-                   </view>
-                   <view class="bt1">
-                        <view class="post">包邮</view><text class="oprice">￥30.00</text>
-                   </view>
-                 </view>
-               </view> -->
+            
             <view class="bottomspace"></view>
           </view>
 
         </scroll-view>
       </swiper-item>
-      <!-- 	<swiper-item wx:for="{{[1,2,3,4,5,6,7,8,9,10,11,12]}}" wx:key="index">
-            <scroll-view scroll-y="true" class="scoll-h">
-                <swiper class="banner1" indicator-dots="{{false}}" indicator-color="#cccccc" indicator-active-color="#f60" autoplay="{{true}}" interval="3000" duration="300">
-                         <block wx:for="{{imgUrls}}">
-                                    <swiper-item>
-                                      <image src="{{item}}" class="slide-image"  mode='widthFix'/>
-                                    </swiper-item>
-                                  </block>
-                                </swiper>
-                <view class="sort">
-                      <button class="s1 {{checkTabOrder == item+'-1'?'active':''}}" size="mini" plain @tap="reOrderList({{item}},1)">综合</button>
-                      <button class="s2 {{checkTabOrder == item+'-2'?'active':''}}" size="mini" plain @tap="reOrderList({{item}},2)">佣金</button>
-                      <button class="s3 {{checkTabOrder == item+'-3'?'active':''}}" size="mini" plain @tap="reOrderList({{item}},3)">销量</button>
-                      <button class="s4 {{checkTabOrder == item+'-4'?'active':''}}" size="mini" plain @tap="reOrderList({{item}},4)"><text class="txt">价格</text>
-                      <block wx:if="{{checkTabOrder == item+'-4'}}">
-                        <text wx:if="{{!priceTag}}" class="iconfont icon-xiangxia1"></text><text wx:else class="iconfont icon-xiangshang1"></text>
-                      </block>
-                    </button>
-                  </view>
-              <view class="mlist1">
-               <view class="listbox1" bindtap="showDetail">
-                  <view class="avatar">
-                      <image class="tag" src="cloud://tuhe32-e323ac.7475-tuhe32-e323ac/images/pdd.png" mode='widthFix'></image>
-                    <image class="img" src="cloud://tuhe32-e323ac.7475-tuhe32-e323ac/images/p1.jpg" mode='widthFix'></image>
-                  </view>
-                  <view class="box">
-                    <view class="tit"><wxc-elip line="2">时尚运动套【领券1套仅57两套99】（每个ID限购5件）</wxc-elip></view>
-                    <view class="info">
-                      <view class="sales fr">销量 53件</view>
-                      <view class="commission fl">赚<text class="small">￥</text><text>4.33</text></view>
-                    </view>
-                    <view class="bt">
-                      <view class="coupon fr">
-                          <view class="txt"><text>20</text> 元券</view>
-                          <image class="img" src="../assets/images/quan.png" mode='widthFix'></image>
-                      </view>
-                      <view class="price fl"><view class="txt"> 券后</view><view class="cprice">￥<text>25.80</text></view></view>
-                    </view>
-                    <view class="bt1">
-                         <view class="post">包邮</view><text class="oprice">￥30.00</text>
-                    </view>
-                  </view>
-                </view>
-                <view class="listbox1" bindtap="showDetail">
-                  <view class="avatar">
-                      <image class="tag" src="cloud://tuhe32-e323ac.7475-tuhe32-e323ac/images/tb.png" mode='widthFix'></image>
-                    <image class="img" src="cloud://tuhe32-e323ac.7475-tuhe32-e323ac/images/p2.jpg" mode='widthFix'></image>
-                  </view>
-                  <view class="box">
-                    <view class="tit"><wxc-elip line="2">时尚运动套【领券1套仅57两套99】（每个ID限购5件）</wxc-elip></view>
-                    <view class="info">
-                      <view class="sales fr">销量 53件</view>
-                      <view class="commission fl">赚<text class="small">￥</text><text>4.33</text></view>
-                    </view>
-                    <view class="bt">
-                      <view class="coupon fr">
-                          <view class="txt"><text>20</text> 元券</view>
-                          <image class="img" src="../assets/images/quan.png" mode='widthFix'></image>
-                      </view>
-                      <view class="price fl"><view class="txt">券后</view><view class="cprice">￥<text>25.80</text></view></view>
-                    </view>
-                    <view class="bt1">
-                         <view class="post">包邮</view><text class="oprice">￥30.00</text>
-                    </view>
-                  </view>
-                </view>
-                <view class="listbox1" bindtap="showDetail">
-                  <view class="avatar">
-                      <image class="tag" src="cloud://tuhe32-e323ac.7475-tuhe32-e323ac/images/pdd.png" mode='widthFix'></image>
-                    <image class="img" src="cloud://tuhe32-e323ac.7475-tuhe32-e323ac/images/p1.jpg" mode='widthFix'></image>
-                  </view>
-                  <view class="box">
-                    <view class="tit"><wxc-elip line="2">时尚运动套【领券1套仅57两套99】（每个ID限购5件）</wxc-elip></view>
-                    <view class="info">
-                      <view class="sales fr">销量 53件</view>
-                      <view class="commission fl">赚<text class="small">￥</text><text>4.33</text></view>
-                    </view>
-                    <view class="bt">
-                      <view class="coupon fr">
-                          <view class="txt"><text>20</text> 元券</view>
-                          <image class="img" src="../assets/images/quan.png" mode='widthFix'></image>
-                      </view>
-                      <view class="price fl"><view class="txt">券后</view><view class="cprice">￥<text>25.80</text></view></view>
-                    </view>
-                    <view class="bt1">
-                         <view class="post">包邮</view><text class="oprice">￥30.00</text>
-                    </view>
-                  </view>
-                </view>
-                                <view class="bottomspace"></view>
-              </view>
-
-            </scroll-view>
-            </swiper-item> -->
     </swiper>
 
   </view>
@@ -281,13 +144,9 @@
     config = {
       navigationBarTitleText: '买好物',
       usingComponents: {
-        'wxc-icon': '../packages/@minui/wxc-icon/dist/index',
-        'wxc-search': '../packages/@minui/wxc-search/dist/index',
-        'wxc-badge': '../packages/@minui/wxc-badge/dist/index',
-        'wxc-elip': '../packages/@minui/wxc-elip/dist/index',
         'van-tab': '../components/vant-weapp/tab/index',
-        "van-tabs": '../components/vant-weapp/tabs/index'
-        // 'vant-action-sheet': '../packages/vant-weapp/dist/action-sheet/index.js',
+        "van-tabs": '../components/vant-weapp/tabs/index',
+				"van-search": '../components/vant-weapp/search/index'
       }
     }
     components = {
@@ -303,6 +162,7 @@
         height: 44,
         fixed: true,
       },
+			searchvalue:'',
       currentTab:0,
       winHeight:"",//窗口高度
       categoryTop:0,

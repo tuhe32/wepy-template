@@ -88,8 +88,7 @@
     config = {
       navigationBarTitleText: '搜索',
       usingComponents: {
-        'wxc-elip': '../packages/@minui/wxc-elip/dist/index',
-        'van-search': '../components/vant-weapp/search/index',
+       "van-search": '../components/vant-weapp/search/index'
       }
     }
     components = {

@@ -18,7 +18,6 @@ export default class extends wepy.app {
       'pages/login',
     	'pages/search',
       'pages/detail',
-			'pages/help',
       'pages/user/favorite',
       'pages/user/index',
       'pages/user/set',
@@ -47,7 +46,7 @@ export default class extends wepy.app {
         {
           'iconPath': 'assets/images/cart.png',
           'selectedIconPath': 'assets/images/cart-active.png',
-          'pagePath': 'pages/help',
+          'pagePath': 'pages/search',
           'text': '报表'
         },
         {
