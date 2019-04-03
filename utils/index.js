@@ -30,7 +30,7 @@ exports.installDependencies = function installDependencies(
 exports.cdAndRun = function cdAndRun(cwd, data, color) {
   console.log(`\n\n# ${color('开始启动项目中，别动！ ...')}`)
   console.log('# ========================\n')
-  runCommand('cd',[data.destDirName],{cwd});
+  runCommand('cd',[cwd],{cwd});
   return runCommand(data.autoInstall,['run dev'],{cwd})
 }
 
